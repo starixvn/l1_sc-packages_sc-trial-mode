@@ -1,0 +1,2 @@
+# sc-trial-mode
+
