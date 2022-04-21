@@ -1,16 +1,11 @@
 import { PlaceBetParams } from '../models/place-bet-params';
 
-const validateBet = (amount, config) => {
-  return true;
-};
-
 export const handlePlaceBet = (params: PlaceBetParams) => {
-  const { socketClient, payload, betQueue, userBalance, config } = params;
+  const { payload, player } = params;
 
-  if (validateBet(payload, config)) {
-    socketClient.emit('endBet', false);
-
-    return;
+  if (payload && player) {
+    player.placeBet(payload);
   } else {
+    player?.emitMessage({ errorCode: 'SB1935' });
   }
 };

@@ -1,9 +1,10 @@
 import { Socket } from 'socket.io';
 import { Config } from '../models/config';
-import { UserBalance } from '../models/user-balance';
+import { GameData } from '../models/game-data';
+import { PlayerHandler } from './player-handler';
 
-export const handleInGame = (socketClient: Socket, userBalance: UserBalance, config: Config) => {
-  userBalance[socketClient.id] = config.defaultBalance;
+export const handleInGame = (socketClient: Socket, gameData: GameData, config: Config) => {
+  gameData[socketClient.id] = new PlayerHandler(config.defaultBalance, socketClient.emit);
 
   socketClient.emit('config', config);
 };

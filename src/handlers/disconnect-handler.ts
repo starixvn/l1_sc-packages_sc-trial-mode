@@ -1,8 +1,8 @@
 import { Socket } from 'socket.io';
-import { UserBalance } from '../models/user-balance';
+import { GameData } from '../models/game-data';
 
-export const handleDisconnect = (socketClient: Socket, userBalance: UserBalance) => {
-  delete userBalance[socketClient.id];
+export const handleDisconnect = (socketClient: Socket, gameData: GameData) => {
+  delete gameData[socketClient.id];
 
   socketClient.emit('disconnect', true);
 };

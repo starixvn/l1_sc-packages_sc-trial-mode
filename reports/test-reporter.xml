@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+    <file path="D:\Lumi\trial-mode-module\trial-mode-module\src\tests\handlers\player-handler.test.ts">
+        <testCase name="playerHandler placeBet should call betQueue.push" duration="2"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet should call proceedBet" duration="1"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet should set isProcessing to true" duration="0"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet when proceedBet success should set isProcessing to false" duration="0"/>
+        <testCase name="playerHandler emitMessage should call emit" duration="0"/>
+        <testCase name="playerHandler proceedBet when bet is valid should emit endBet success" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should call getSettlementResult" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should emit finish result" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should update user balance" duration="1"/>
+    </file>
+</testExecutions>
