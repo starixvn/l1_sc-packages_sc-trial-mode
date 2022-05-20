@@ -1,9 +1,9 @@
-import { PlayerHandler } from "../../handlers/player-handler";
-import { Bet } from "../../models/bet";
+import { PlayerHandler } from "../../src/handlers/player-handler";
+import { Bet } from "../../src/models/bet";
 import { Chance } from "chance";
-import { User } from "../../models/game-data";
-import { SlotConfig } from "../../models/config";
-import noticeHelper from "../../helpers/notice-helper";
+import { User } from "../../src/models/game-data";
+import { SlotConfig } from "../../src/models/config";
+import noticeHelper from "../../src/helpers/notice-helper";
 
 const chance = new Chance();
 

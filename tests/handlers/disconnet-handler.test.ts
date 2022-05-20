@@ -1,4 +1,4 @@
-import { handleDisconnect } from "../../handlers/disconnect-handler";
+import { handleDisconnect } from "../../src/handlers/disconnect-handler";
 import { Chance } from "chance";
 
 describe("disconnectHandler", () => {

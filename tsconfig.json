@@ -12,7 +12,7 @@
         "moduleResolution": "node",
         "allowJs": true
     },
-    "exclude": ["tests/", "lib/", "node_modules/", "src/statistics/", "coverage/", "reports/"],
+    "exclude": ["tests/", "lib/", "node_modules/", "coverage/", "reports/"],
     "watchOptions": {
         "excludeDirectories": ["lib/*"]
     }

@@ -1,9 +1,9 @@
-import { handlePlaceBet } from "../../handlers";
-import { PlayerHandler } from "../../handlers/player-handler";
-import noticeHelper from "../../helpers/notice-helper";
+import { handlePlaceBet } from "../../src/handlers";
+import { PlayerHandler } from "../../src/handlers/player-handler";
+import noticeHelper from "../../src/helpers/notice-helper";
 import { Chance } from "chance";
 
-jest.mock("../../handlers/player-handler");
+jest.mock("../../src/handlers/player-handler");
 
 describe("placeBetHandler", () => {
     const chance = new Chance();

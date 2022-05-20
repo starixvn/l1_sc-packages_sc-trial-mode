@@ -1,7 +1,7 @@
-import { handleInGame } from "../../handlers/in-game-handler";
+import { handleInGame } from "../../src/handlers/in-game-handler";
 import { Chance } from "chance";
-import { Config } from "../../models/config";
-import { PlayerHandler } from "../../handlers/player-handler";
+import { Config } from "../../src/models/config";
+import { PlayerHandler } from "../../src/handlers/player-handler";
 
 describe("inGameHandler", () => {
     const chance = new Chance();

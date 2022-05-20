@@ -2,7 +2,8 @@
   "name": "sc-trial-mode",
   "version": "0.0.1-beta.0",
   "description": "Trial Mode Module",
-  "main": "src/trial-mode.ts",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "keywords": [
     "trial-mode",
     "sc-trial-mode"
@@ -13,13 +14,19 @@
   },
   "type": "module",
   "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix  && prettier --write '{src}/**/*.ts'",
+    "prebuild": "del-cli --force lib",
+    "build": "tsc -p .",
+    "build:watch": "tsc --watch",
     "test": "jest",
     "test-coverage": "jest --collect-coverage",
     "reg": "npm set registry http://npm.lumigame.com",
     "pub": "npm publish --registry http://npm.lumigame.com",
     "betaver": "npm version prerelease --preid beta",
     "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "statistic": "node --experimental-specifier-resolution=node --loader ts-node/esm ./src/statistics/statistic-reporter.ts"
   },
   "dependencies": {},
   "devDependencies": {
