@@ -1,6 +1,6 @@
 {
   "name": "sc-trial-mode",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.0",
   "description": "Trial Mode Module",
   "main": "src/trial-mode.ts",
   "keywords": [
@@ -21,8 +21,7 @@
     "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
     "semantic-release": "semantic-release"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/commit-analyzer": "^8.0.1",
