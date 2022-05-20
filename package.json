@@ -4,6 +4,9 @@
   "description": "Trial Mode Module",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
+  "files": [
+      "lib/"
+  ],
   "keywords": [
     "trial-mode",
     "sc-trial-mode"
