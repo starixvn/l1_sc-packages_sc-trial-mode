@@ -2,11 +2,11 @@ import { SlotConfig } from "../models/config";
 import { GameData } from "../models/game-data";
 
 export class ProcessQueueJob {
-    private gameData: GameData;
-    private getSettlementResult: Function;
-    private slotConfig: SlotConfig;
-    private processInterval = 50;
-    private logError: Function;
+    private readonly gameData: GameData;
+    private readonly getSettlementResult: Function;
+    private readonly slotConfig: SlotConfig;
+    private readonly processInterval = 50;
+    private readonly logError: Function;
 
     constructor(gameData: GameData, getSettlementResult: Function, slotConfig: SlotConfig, logError: Function) {
         this.gameData = gameData;

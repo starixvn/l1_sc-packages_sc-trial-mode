@@ -5,8 +5,8 @@ import { GameData } from "./models/game-data";
 import { ProcessQueueJob } from "./handlers/process-queue-handler";
 
 export class TrialMode {
-    private config: Config;
-    private gameData: GameData;
+    private readonly config: Config;
+    private readonly gameData: GameData;
 
     constructor(config: Config, getSettleBetResult: Function, logError: Function) {
         this.config = config;

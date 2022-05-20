@@ -108,7 +108,7 @@ describe("playerHandler", () => {
         it("should call emit", () => {
             // Arrange
             const message = chance.string();
-            handler["emit"] = jest.fn();
+            jest.spyOn(handler as any, "emit");
 
             // Act
             handler.emitMessage(message);

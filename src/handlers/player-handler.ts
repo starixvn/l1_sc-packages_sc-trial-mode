@@ -4,12 +4,12 @@ import { FreeSpin } from "../models/free-spin";
 import NoticeHelper from "../helpers/notice-helper";
 
 export class PlayerHandler {
-    private betQueue: Array<Bet>;
+    private readonly betQueue: Array<Bet>;
+    private readonly emit: Function;
     private isProcessing: boolean;
     private balance: number;
     private freeSpins: FreeSpin;
     private totalMultiplier: number;
-    private emit: Function;
 
     constructor(balance: number, emit: Function) {
         this.balance = balance;
