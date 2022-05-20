@@ -1,63 +1,161 @@
-import { Bet } from '../models/bet';
-import { SlotConfig } from '../models/config';
+import { Bet } from "../models/bet";
+import { SlotConfig } from "../models/config";
+import { FreeSpin } from "../models/free-spin";
+import NoticeHelper from "../helpers/notice-helper";
 
 export class PlayerHandler {
-  private betQueue: Array<Bet>;
-  private isProcessing: boolean;
-  private balance: number;
-  private emit: Function;
+    private betQueue: Array<Bet>;
+    private isProcessing: boolean;
+    private balance: number;
+    private freeSpins: FreeSpin;
+    private totalMultiplier: number;
+    private emit: Function;
 
-  constructor(balance: number, emit: Function) {
-    this.balance = balance;
-    this.emit = emit;
-    this.isProcessing = false;
-    this.betQueue = [];
-  }
-
-  public placeBet(bet: Bet) {
-    this.betQueue.push(bet);
-  }
-
-  public async dequeueBets(getSettlementResult: Function, slotConfig: SlotConfig) {
-    if (!this.isProcessing) {
-      this.isProcessing = true;
-      const bet = this.betQueue.shift();
-
-      this.proceedBet(bet, getSettlementResult, slotConfig)
-        .then(() => (this.isProcessing = false))
-        .catch(err => {
-          console.log(err);
-        });
-    }
-  }
-
-  public emitMessage(message: Object) {
-    this.emit('trial-mode', message);
-  }
-
-  private async proceedBet(bet: Bet, getSettlementResult: Function, slotConfig: SlotConfig) {
-    if (bet && this.validateBet(bet, slotConfig)) {
-      const betAmount = bet.betLevel * bet.coinValue;
-      this.emitMessage({ endBet: betAmount, user: { balance: this.balance - betAmount } });
-
-      const result = await getSettlementResult(bet, slotConfig);
-
-      this.balance = this.balance + result.netWin - betAmount;
-      this.emitMessage({ finish: result });
-    }
-  }
-
-  private validateBet(bet: Bet, slotConfig: SlotConfig) {
-    if (!slotConfig.betLevels.includes(bet.betLevel) || !slotConfig.coinValues.includes(bet.coinValue)) {
-      this.emitMessage({ errorCode: 'SB1935' });
-      return false;
+    constructor(balance: number, emit: Function) {
+        this.balance = balance;
+        this.emit = emit;
+        this.isProcessing = false;
+        this.betQueue = [];
+        this.freeSpins = { available: 0, coinValue: 0, betLevel: 0 };
+        this.totalMultiplier = 0;
     }
 
-    if (bet.betLevel * bet.coinValue > this.balance) {
-      this.emitMessage({ errorCode: 'SB1907' });
-      return false;
+    public placeBet(bet: Bet) {
+        this.betQueue.push(bet);
     }
 
-    return true;
-  }
+    public async dequeueBets(getSettlementResult: Function, slotConfig: SlotConfig, logError: Function) {
+        if (!this.isProcessing) {
+            this.isProcessing = true;
+            const bet = this.betQueue.shift();
+
+            this.proceedBet(bet, getSettlementResult, slotConfig)
+                .then(() => (this.isProcessing = false))
+                .catch((err) => {
+                    logError(err);
+                });
+        } else {
+            this.emitMessage({ endBet: -1, errorCode: NoticeHelper.cannotPlaceBet });
+        }
+    }
+
+    public emitMessage(message: Object) {
+        this.emit(message);
+    }
+
+    private async proceedBet(bet: Bet, getSettlementResult: Function, slotConfig: SlotConfig) {
+        if (bet && this.validateBet(bet, slotConfig)) {
+            bet.freeSpin = this.freeSpins.available > 0;
+
+            if (bet.freeSpin) {
+                bet.betLevel = this.freeSpins.betLevel;
+                bet.coinValue = this.freeSpins.coinValue;
+                this.freeSpins.available--;
+
+                this.emitMessage({ endBet: 0, freeSpin: true, user: { balance: this.balance } });
+            } else {
+                const betAmount = bet.betLevel * bet.coinValue * slotConfig.betMultiplier;
+
+                this.totalMultiplier = 0;
+                this.balance -= betAmount;
+
+                this.emitMessage({ endBet: betAmount, user: { balance: this.balance } });
+            }
+
+            const round = this.generateRoundFromBet(bet, slotConfig);
+            await getSettlementResult(round, this.totalMultiplier);
+
+            this.collectFreeSpins(round);
+            this.collectTotalMultiplier(round);
+
+            this.balance = this.balance + round.betwin;
+            this.emitMessage({ finish: this.collectRoundResult(round, slotConfig.bigWinRatio) });
+        }
+    }
+
+    private collectFreeSpins(round) {
+        if (round.settlementResult.freeSpins.odds) {
+            this.freeSpins.betLevel = round.betLevel;
+            this.freeSpins.coinValue = round.coinValue;
+            this.freeSpins.available = round.settlementResult.freeSpins.odds;
+        } else {
+            this.freeSpins.available += round.settlementResult.additionalFreeSpins.odds ?? 0;
+        }
+    }
+
+    private collectTotalMultiplier(round) {
+        if (round.freeSpin) {
+            this.totalMultiplier += round.multiplier ?? 0;
+        }
+    }
+
+    private collectRoundResult(round, bigWinRatio: number) {
+        return {
+            roundId: round.id,
+            result: round.result,
+            win: round.betwin,
+            bigWin: round.totalAmount * bigWinRatio > round.betwin,
+            freeSpins: round.settlementResult.freeSpins.odds,
+            tumbles: round.settlementResult.tumbles.map((tumble) => ({
+                icons: tumble.icons,
+                win: tumble.win,
+                result: tumble.newBoard,
+                multipliers: tumble.multipliers,
+                settlement: {
+                    explode: tumble.explodedSymbols,
+                    new: tumble.newSymbols,
+                },
+            })),
+            multiplier: round.multiplier,
+            totalMultiplier: round.totalMultiplier,
+        };
+    }
+
+    private generateRoundFromBet(bet: Bet, slotConfig: SlotConfig) {
+        return {
+            freeSpin: bet.freeSpin,
+            bet: bet.betLevel * bet.coinValue,
+            totalAmount: bet.betLevel * bet.coinValue * slotConfig.betMultiplier,
+            betMultiplier: slotConfig.betMultiplier,
+            betLevel: bet.betLevel,
+            coinValue: bet.coinValue,
+            bigWin: false,
+            odds: {
+                oddsByCount: slotConfig.oddsByCounts,
+                freeSpins: slotConfig.freeSpins,
+            },
+            settlementResult: {
+                freeSpins: { count: 0, odds: 0 },
+                additionalFreeSpins: { count: 0, odds: 0 },
+            },
+            betwin: 0,
+            totalMultiplier: 0,
+            totalTumbleWin: 0,
+            multiplier: 0,
+            result: "",
+        };
+    }
+
+    private validateBet(bet: Bet, slotConfig: SlotConfig) {
+        if (bet.freeSpin && this.freeSpins.available > 0) {
+            return true;
+        }
+
+        if (bet.freeSpin && this.freeSpins.available <= 0) {
+            this.emitMessage({ errorCode: NoticeHelper.invalidFreeSpin });
+            return false;
+        }
+
+        if (!slotConfig.betLevels.includes(bet.betLevel) || !slotConfig.coinValues.includes(bet.coinValue)) {
+            this.emitMessage({ errorCode: NoticeHelper.invalidBet });
+            return false;
+        }
+
+        if (bet.betLevel * bet.coinValue * slotConfig.betMultiplier > this.balance) {
+            this.emitMessage({ errorCode: NoticeHelper.notEnoughMoney });
+            return false;
+        }
+
+        return true;
+    }
 }

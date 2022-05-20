@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./lib",
+        "lib": ["es5", "es6"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "resolveJsonModule": true,
+        "moduleResolution": "node",
+        "allowJs": true
+    },
+    "exclude": ["tests/", "lib/", "node_modules/", "src/statistics/", "coverage/", "reports/"],
+    "watchOptions": {
+        "excludeDirectories": ["lib/*"]
+    }
+}

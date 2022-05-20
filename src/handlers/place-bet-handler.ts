@@ -1,11 +1,12 @@
-import { PlaceBetParams } from '../models/place-bet-params';
+import { PlaceBetParams } from "../models/place-bet-params";
+import NoticeHelper from "../helpers/notice-helper";
 
 export const handlePlaceBet = (params: PlaceBetParams) => {
-  const { payload, player } = params;
+    const { payload, player } = params;
 
-  if (payload && player) {
-    player.placeBet(payload);
-  } else {
-    player?.emitMessage({ errorCode: 'SB1935' });
-  }
+    if (payload && player) {
+        player.placeBet(payload);
+    } else {
+        player?.emitMessage({ errorCode: NoticeHelper.invalidBet });
+    }
 };

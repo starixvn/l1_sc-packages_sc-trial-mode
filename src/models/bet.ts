@@ -1,4 +1,5 @@
 export interface Bet {
-  betLevel: number;
-  coinValue: number;
+    betLevel: number;
+    coinValue: number;
+    freeSpin?: boolean;
 }

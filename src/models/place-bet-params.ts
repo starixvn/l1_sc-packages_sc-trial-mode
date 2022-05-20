@@ -1,7 +1,7 @@
-import { PlayerHandler } from '../handlers/player-handler';
-import { Bet } from './bet';
+import { PlayerHandler } from "../handlers/player-handler";
+import { Bet } from "./bet";
 
 export interface PlaceBetParams {
-  payload: Bet;
-  player: PlayerHandler;
+    payload: Bet;
+    player: PlayerHandler;
 }

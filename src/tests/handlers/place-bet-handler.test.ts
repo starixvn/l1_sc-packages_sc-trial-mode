@@ -1,39 +1,52 @@
-import { handlePlaceBet } from '../../handlers';
-import { PlayerHandler } from '../../handlers/player-handler';
+import { handlePlaceBet } from "../../handlers";
+import { PlayerHandler } from "../../handlers/player-handler";
+import noticeHelper from "../../helpers/notice-helper";
+import { Chance } from "chance";
 
-jest.mock('../../handlers/player-handler');
+jest.mock("../../handlers/player-handler");
 
-describe('placeBetHandler', () => {
-  const player = new PlayerHandler(2000, jest.fn());
+describe("placeBetHandler", () => {
+    const chance = new Chance();
+    const player = new PlayerHandler(2000, jest.fn());
 
-  describe('when params is NOT valid', () => {
-    it('should not call placeBet', () => {
-      // Act
-      handlePlaceBet({ payload: { betLevel: 1, coinValue: 1 }, player: undefined });
+    describe("when player is NOT valid", () => {
+        it("should not call placeBet", () => {
+            // Act
+            handlePlaceBet({ payload: { betLevel: chance.natural(), coinValue: chance.natural(), freeSpin: chance.bool() }, player: undefined });
 
-      // Assert
-      expect(player.placeBet).not.toBeCalled();
+            // Assert
+            expect(player.placeBet).not.toBeCalled();
+        });
     });
 
-    it('should emit error to client', () => {
-      // Act
-      handlePlaceBet({ payload: undefined, player });
+    describe("when payload NOT is valid", () => {
+        it("should not call placeBet", () => {
+            // Act
+            handlePlaceBet({ payload: undefined, player });
 
-      // Assert
-      expect(player.emitMessage).toBeCalledWith({ errorCode: 'SB1935' });
+            // Assert
+            expect(player.placeBet).not.toBeCalled();
+        });
+
+        it("should emit error to client", () => {
+            // Act
+            handlePlaceBet({ payload: undefined, player: player });
+
+            // Assert
+            expect(player.emitMessage).toBeCalledWith({ errorCode: noticeHelper.invalidBet });
+        });
     });
-  });
 
-  describe('when params is valid', () => {
-    it('should not call placeBet', () => {
-      // Arrange
-      const payload = { betLevel: 1, coinValue: 1 };
+    describe("when params is valid", () => {
+        it("should call player.placeBet", () => {
+            // Arrange
+            const payload = { betLevel: chance.natural(), coinValue: chance.natural(), freeSpin: chance.bool() };
 
-      // Act
-      handlePlaceBet({ payload, player });
+            // Act
+            handlePlaceBet({ payload, player });
 
-      // Assert
-      expect(player.placeBet).toBeCalledWith(payload);
+            // Assert
+            expect(player.placeBet).toBeCalledWith(payload);
+        });
     });
-  });
 });
