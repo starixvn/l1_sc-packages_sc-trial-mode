@@ -1,5 +1,5 @@
 import { Bet } from "../models/bet";
-import { SlotConfig } from "../models/config";
+import { CascadingSlotsConfig } from "../models/config";
 import { FreeSpin } from "../models/free-spin";
 import NoticeHelper from "../helpers/notice-helper";
 
@@ -24,12 +24,12 @@ export class PlayerHandler {
         this.betQueue.push(bet);
     }
 
-    public async dequeueBets(getSettlementResult: Function, slotConfig: SlotConfig, logError: Function) {
+    public async dequeueBets(getSettlementResult: Function, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
         if (!this.isProcessing) {
             this.isProcessing = true;
             const bet = this.betQueue.shift();
 
-            this.proceedBet(bet, getSettlementResult, slotConfig)
+            this.proceedBet(bet, getSettlementResult, cascadingSlotsConfig)
                 .then(() => (this.isProcessing = false))
                 .catch((err) => {
                     logError(err);
@@ -43,8 +43,8 @@ export class PlayerHandler {
         this.emit(message);
     }
 
-    private async proceedBet(bet: Bet, getSettlementResult: Function, slotConfig: SlotConfig) {
-        if (bet && this.validateBet(bet, slotConfig)) {
+    private async proceedBet(bet: Bet, getSettlementResult: Function, cascadingSlotsConfig: CascadingSlotsConfig) {
+        if (bet && this.validateBet(bet, cascadingSlotsConfig)) {
             bet.freeSpin = this.freeSpins.available > 0;
 
             if (bet.freeSpin) {
@@ -54,7 +54,7 @@ export class PlayerHandler {
 
                 this.emitMessage({ endBet: 0, freeSpin: true, user: { balance: this.balance } });
             } else {
-                const betAmount = bet.betLevel * bet.coinValue * slotConfig.betMultiplier;
+                const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
 
                 this.totalMultiplier = 0;
                 this.balance -= betAmount;
@@ -62,14 +62,14 @@ export class PlayerHandler {
                 this.emitMessage({ endBet: betAmount, user: { balance: this.balance } });
             }
 
-            const round = this.generateRoundFromBet(bet, slotConfig);
+            const round = this.generateRoundFromBet(bet, cascadingSlotsConfig);
             await getSettlementResult(round, this.totalMultiplier);
 
             this.collectFreeSpins(round);
             this.collectTotalMultiplier(round);
 
             this.balance = this.balance + round.betwin;
-            this.emitMessage({ finish: this.collectRoundResult(round, slotConfig.bigWinRatio) });
+            this.emitMessage({ finish: this.collectRoundResult(round, cascadingSlotsConfig.bigWinRatio) });
         }
     }
 
@@ -111,18 +111,18 @@ export class PlayerHandler {
         };
     }
 
-    private generateRoundFromBet(bet: Bet, slotConfig: SlotConfig) {
+    private generateRoundFromBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig) {
         return {
             freeSpin: bet.freeSpin,
             bet: bet.betLevel * bet.coinValue,
-            totalAmount: bet.betLevel * bet.coinValue * slotConfig.betMultiplier,
-            betMultiplier: slotConfig.betMultiplier,
+            totalAmount: bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier,
+            betMultiplier: cascadingSlotsConfig.betMultiplier,
             betLevel: bet.betLevel,
             coinValue: bet.coinValue,
             bigWin: false,
             odds: {
-                oddsByCount: slotConfig.oddsByCounts,
-                freeSpins: slotConfig.freeSpins,
+                oddsByCount: cascadingSlotsConfig.oddsByCounts,
+                freeSpins: cascadingSlotsConfig.freeSpins,
             },
             settlementResult: {
                 freeSpins: { count: 0, odds: 0 },
@@ -136,7 +136,7 @@ export class PlayerHandler {
         };
     }
 
-    private validateBet(bet: Bet, slotConfig: SlotConfig) {
+    private validateBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig) {
         if (bet.freeSpin && this.freeSpins.available > 0) {
             return true;
         }
@@ -146,12 +146,12 @@ export class PlayerHandler {
             return false;
         }
 
-        if (!slotConfig.betLevels.includes(bet.betLevel) || !slotConfig.coinValues.includes(bet.coinValue)) {
+        if (!cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !cascadingSlotsConfig.coinValues.includes(bet.coinValue)) {
             this.emitMessage({ errorCode: NoticeHelper.invalidBet });
             return false;
         }
 
-        if (bet.betLevel * bet.coinValue * slotConfig.betMultiplier > this.balance) {
+        if (bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier > this.balance) {
             this.emitMessage({ errorCode: NoticeHelper.notEnoughMoney });
             return false;
         }

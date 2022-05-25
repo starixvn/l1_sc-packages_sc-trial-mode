@@ -12,7 +12,7 @@ export class TrialMode {
         this.config = config;
         this.gameData = {};
 
-        const processQueueJob = new ProcessQueueJob(this.gameData, getSettleBetResult, config.slotConfig, logError);
+        const processQueueJob = new ProcessQueueJob(this.gameData, getSettleBetResult, config.cascadingSlotsConfig, logError);
 
         processQueueJob.run();
     }

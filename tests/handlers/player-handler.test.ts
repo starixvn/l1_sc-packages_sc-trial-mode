@@ -2,7 +2,7 @@ import { PlayerHandler } from "../../src/handlers/player-handler";
 import { Bet } from "../../src/models/bet";
 import { Chance } from "chance";
 import { User } from "../../src/models/game-data";
-import { SlotConfig } from "../../src/models/config";
+import { CascadingSlotsConfig } from "../../src/models/config";
 import noticeHelper from "../../src/helpers/notice-helper";
 
 const chance = new Chance();
@@ -11,11 +11,11 @@ const user: User = {
     balance: chance.natural(),
     emit: jest.fn(),
 };
-const slotConfig = {
+const cascadingSlotsConfig = {
     betMultiplier: 20,
     betLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     coinValues: [0.1, 0.5, 1, 2, 3, 4, 5],
-} as SlotConfig;
+} as CascadingSlotsConfig;
 
 const logError = jest.fn();
 let handler = new PlayerHandler(user.balance, user.emit);
@@ -42,7 +42,7 @@ describe("playerHandler", () => {
 
     describe("dequeueBets", () => {
         const getSettleBetResult = jest.fn();
-        const slotConfig = {} as SlotConfig;
+        const cascadingSlotsConfig = {} as CascadingSlotsConfig;
 
         describe("when is NOT processing bet", () => {
             beforeEach(() => {
@@ -56,7 +56,7 @@ describe("playerHandler", () => {
                     handler.emitMessage = jest.fn();
 
                     // Act
-                    await handler.dequeueBets(getSettleBetResult, slotConfig, logError);
+                    await handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
 
                     // Assert
                     expect(handler.emitMessage).toBeCalledWith({ endBet: -1, errorCode: noticeHelper.cannotPlaceBet });
@@ -74,15 +74,15 @@ describe("playerHandler", () => {
                     handler["betQueue"].shift = jest.fn().mockReturnValueOnce(bet);
 
                     // Act
-                    handler.dequeueBets(getSettleBetResult, slotConfig, logError);
+                    handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
 
                     // Assert
-                    expect(handler["proceedBet"]).toBeCalledWith(bet, getSettleBetResult, slotConfig);
+                    expect(handler["proceedBet"]).toBeCalledWith(bet, getSettleBetResult, cascadingSlotsConfig);
                 });
 
                 it("should set isProcessing to true", () => {
                     // Act
-                    handler.dequeueBets(getSettleBetResult, slotConfig, logError);
+                    handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
 
                     // Assert
                     expect(handler["isProcessing"]).toBeTruthy();
@@ -94,7 +94,7 @@ describe("playerHandler", () => {
                         handler["proceedBet"] = jest.fn().mockResolvedValue("success");
 
                         // Act
-                        await handler.dequeueBets(getSettleBetResult, slotConfig, logError);
+                        await handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
 
                         // Assert
                         expect(handler["isProcessing"]).toBeFalsy();
@@ -153,7 +153,7 @@ describe("playerHandler", () => {
 
                 it("should deduct available free spins", async () => {
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(freeSpinData.available).toBe(2);
@@ -161,7 +161,7 @@ describe("playerHandler", () => {
 
                 it("should update bet", async () => {
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(bet).toStrictEqual({ betLevel: freeSpinData.betLevel, coinValue: freeSpinData.coinValue, freeSpin: true });
@@ -172,7 +172,7 @@ describe("playerHandler", () => {
                     const currentBalance = handler["balance"];
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["emitMessage"]).toHaveBeenNthCalledWith(1, { endBet: 0, freeSpin: true, user: { balance: currentBalance } });
@@ -187,7 +187,7 @@ describe("playerHandler", () => {
                     handler["totalMultiplier"] = 4;
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["totalMultiplier"]).toBe(0);
@@ -196,11 +196,11 @@ describe("playerHandler", () => {
                 it("should deduct player balance", async () => {
                     // Arrange
                     const prevBalance = handler["balance"];
-                    const betAmount = bet.betLevel * bet.coinValue * slotConfig.betMultiplier;
+                    const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
                     getSettlementResult = jest.fn().mockResolvedValueOnce({ betwin: 0 });
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["balance"]).toBe(prevBalance - betAmount);
@@ -208,10 +208,10 @@ describe("playerHandler", () => {
 
                 it("should emit success bet", async () => {
                     // Arrange
-                    const betAmount = bet.betLevel * bet.coinValue * slotConfig.betMultiplier;
+                    const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["emitMessage"]).toBeCalledWith({ endBet: betAmount, user: { balance: handler["balance"] } });
@@ -220,10 +220,10 @@ describe("playerHandler", () => {
 
             it("should call generateRoundFromBet", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
-                expect(handler["generateRoundFromBet"]).toBeCalledWith(bet, slotConfig);
+                expect(handler["generateRoundFromBet"]).toBeCalledWith(bet, cascadingSlotsConfig);
             });
 
             it("should call getSettlementResult", async () => {
@@ -232,7 +232,7 @@ describe("playerHandler", () => {
                 handler["generateRoundFromBet"] = jest.fn().mockReturnValueOnce(mockRound);
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
                 expect(getSettlementResult).toBeCalledWith(mockRound, handler["totalMultiplier"]);
@@ -240,7 +240,7 @@ describe("playerHandler", () => {
 
             it("should call collect free spins", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["collectFreeSpins"]).toBeCalledWith(round);
@@ -248,7 +248,7 @@ describe("playerHandler", () => {
 
             it("should call collect free spins", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["collectTotalMultiplier"]).toBeCalledWith(round);
@@ -258,13 +258,13 @@ describe("playerHandler", () => {
                 // Arrange
                 const prevBalance = handler["balance"];
                 const betwin = chance.natural();
-                const betAmount = bet.betLevel * bet.coinValue * slotConfig.betMultiplier;
+                const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
                 getSettlementResult = jest.fn().mockImplementation((round) => {
                     round.betwin = betwin;
                 });
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["balance"]).toBe(prevBalance - betAmount + betwin);
@@ -272,10 +272,10 @@ describe("playerHandler", () => {
 
             it("should call collectRoundResult", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
-                expect(handler["collectRoundResult"]).toBeCalledWith(round, slotConfig.bigWinRatio);
+                expect(handler["collectRoundResult"]).toBeCalledWith(round, cascadingSlotsConfig.bigWinRatio);
             });
 
             it("should emit finish to client", async () => {
@@ -287,7 +287,7 @@ describe("playerHandler", () => {
                 handler["collectRoundResult"] = jest.fn().mockReturnValueOnce(roundResult);
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, slotConfig);
+                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler.emitMessage).toBeCalledWith({ finish: roundResult });
@@ -391,7 +391,7 @@ describe("playerHandler", () => {
                 handler["freeSpins"].available = 4;
 
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeTruthy();
@@ -411,7 +411,7 @@ describe("playerHandler", () => {
 
             it("should emit invalidFreeSpin to client", () => {
                 // Act
-                handler["validateBet"](bet, slotConfig);
+                handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["emitMessage"]).toBeCalledWith({ errorCode: noticeHelper.invalidFreeSpin });
@@ -419,7 +419,7 @@ describe("playerHandler", () => {
 
             it("should return false", () => {
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeFalsy();
@@ -429,19 +429,19 @@ describe("playerHandler", () => {
         describe("when bet level is invalid", () => {
             const bet: Bet = {
                 betLevel: 20,
-                coinValue: chance.pickone(slotConfig.coinValues),
+                coinValue: chance.pickone(cascadingSlotsConfig.coinValues),
             };
 
             it("should emit invalidBet to client", () => {
                 // Act
-                handler["validateBet"](bet, slotConfig);
+                handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["emitMessage"]).toBeCalledWith({ errorCode: noticeHelper.invalidBet });
             });
             it("should return false", () => {
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeFalsy();
@@ -450,20 +450,20 @@ describe("playerHandler", () => {
 
         describe("when coin value is invalid", () => {
             const bet: Bet = {
-                betLevel: chance.pickone(slotConfig.betLevels),
+                betLevel: chance.pickone(cascadingSlotsConfig.betLevels),
                 coinValue: 0,
             };
 
             it("should emit invalidBet to client", () => {
                 // Act
-                handler["validateBet"](bet, slotConfig);
+                handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["emitMessage"]).toBeCalledWith({ errorCode: noticeHelper.invalidBet });
             });
             it("should return false", () => {
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeFalsy();
@@ -472,8 +472,8 @@ describe("playerHandler", () => {
 
         describe("when player does NOT have enough balance", () => {
             const bet: Bet = {
-                betLevel: chance.pickone(slotConfig.betLevels),
-                coinValue: chance.pickone(slotConfig.coinValues),
+                betLevel: chance.pickone(cascadingSlotsConfig.betLevels),
+                coinValue: chance.pickone(cascadingSlotsConfig.coinValues),
             };
 
             beforeEach(() => {
@@ -482,7 +482,7 @@ describe("playerHandler", () => {
 
             it("should emit notEnoughMoney to client", () => {
                 // Act
-                handler["validateBet"](bet, slotConfig);
+                handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["emitMessage"]).toBeCalledWith({ errorCode: noticeHelper.notEnoughMoney });
@@ -490,7 +490,7 @@ describe("playerHandler", () => {
 
             it("should return false", () => {
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeFalsy();
@@ -501,13 +501,13 @@ describe("playerHandler", () => {
             it("should return true", () => {
                 // Arrange
                 const bet: Bet = {
-                    betLevel: chance.pickone(slotConfig.betLevels),
-                    coinValue: chance.pickone(slotConfig.coinValues),
+                    betLevel: chance.pickone(cascadingSlotsConfig.betLevels),
+                    coinValue: chance.pickone(cascadingSlotsConfig.coinValues),
                 };
                 handler["balance"] = 2000;
 
                 // Act
-                const actualResult = handler["validateBet"](bet, slotConfig);
+                const actualResult = handler["validateBet"](bet, cascadingSlotsConfig);
 
                 // Assert
                 expect(actualResult).toBeTruthy();

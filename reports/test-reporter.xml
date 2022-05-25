@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\disconnet-handler.test.ts">
+        <testCase name="disconnectHandler handleDisconnect should delete player data on game data" duration="2"/>
+        <testCase name="disconnectHandler handleDisconnect should emit disconnect to client" duration="2"/>
+    </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\in-game-handler.test.ts">
-        <testCase name="inGameHandler should assign player info to ingame data" duration="6"/>
+        <testCase name="inGameHandler should assign player info to ingame data" duration="3"/>
         <testCase name="inGameHandler should emit config to client" duration="1"/>
     </file>
-    <file path="D:\Lumi\sc-trial-mode\tests\handlers\disconnet-handler.test.ts">
-        <testCase name="disconnectHandler handleDisconnect should delete player data on game data" duration="3"/>
-        <testCase name="disconnectHandler handleDisconnect should emit disconnect to client" duration="1"/>
-    </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\player-handler.test.ts">
-        <testCase name="playerHandler placeBet should call betQueue.push" duration="5"/>
-        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is processing should emit cant place bet to client" duration="2"/>
-        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing should call proceedBet" duration="2"/>
-        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing should set isProcessing to true" duration="2"/>
-        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing when proceedBet success should set isProcessing to false" duration="1"/>
-        <testCase name="playerHandler emitMessage should call emit" duration="2"/>
-        <testCase name="playerHandler proceedBet when bet is valid when bet is free bet should deduct available free spins" duration="3"/>
+        <testCase name="playerHandler placeBet should call betQueue.push" duration="4"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is processing should emit cant place bet to client" duration="1"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing should call proceedBet" duration="1"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing should set isProcessing to true" duration="1"/>
+        <testCase name="playerHandler dequeueBets when is NOT processing bet when bet is NOT processing when proceedBet success should set isProcessing to false" duration="2"/>
+        <testCase name="playerHandler emitMessage should call emit" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid when bet is free bet should deduct available free spins" duration="1"/>
         <testCase name="playerHandler proceedBet when bet is valid when bet is free bet should update bet" duration="1"/>
-        <testCase name="playerHandler proceedBet when bet is valid when bet is free bet should emit message bet success" duration="3"/>
-        <testCase name="playerHandler proceedBet when bet is valid when bet is normal bet should set total multiplier to zero" duration="2"/>
-        <testCase name="playerHandler proceedBet when bet is valid when bet is normal bet should deduct player balance" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid when bet is free bet should emit message bet success" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid when bet is normal bet should set total multiplier to zero" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid when bet is normal bet should deduct player balance" duration="0"/>
         <testCase name="playerHandler proceedBet when bet is valid when bet is normal bet should emit success bet" duration="1"/>
         <testCase name="playerHandler proceedBet when bet is valid should call generateRoundFromBet" duration="0"/>
         <testCase name="playerHandler proceedBet when bet is valid should call getSettlementResult" duration="1"/>
-        <testCase name="playerHandler proceedBet when bet is valid should call collect free spins" duration="1"/>
         <testCase name="playerHandler proceedBet when bet is valid should call collect free spins" duration="0"/>
-        <testCase name="playerHandler proceedBet when bet is valid should add bet win into player balance" duration="1"/>
-        <testCase name="playerHandler proceedBet when bet is valid should call collectRoundResult" duration="0"/>
-        <testCase name="playerHandler proceedBet when bet is valid should emit finish to client" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should call collect free spins" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should add bet win into player balance" duration="0"/>
+        <testCase name="playerHandler proceedBet when bet is valid should call collectRoundResult" duration="1"/>
+        <testCase name="playerHandler proceedBet when bet is valid should emit finish to client" duration="0"/>
         <testCase name="playerHandler collectFreeSpins when player gains free spins should set player freeSpins.betLevel" duration="0"/>
         <testCase name="playerHandler collectFreeSpins when player gains free spins should set player freeSpins.coinValue" duration="0"/>
-        <testCase name="playerHandler collectFreeSpins when player gains free spins should set player freeSpins.available" duration="1"/>
-        <testCase name="playerHandler collectFreeSpins when player gains additional free spins should add free spins to available free spins" duration="0"/>
+        <testCase name="playerHandler collectFreeSpins when player gains free spins should set player freeSpins.available" duration="0"/>
+        <testCase name="playerHandler collectFreeSpins when player gains additional free spins should add free spins to available free spins" duration="1"/>
         <testCase name="playerHandler collectTotalMultiplier when round is using free spin should add multiplier to player total multiplier" duration="0"/>
         <testCase name="playerHandler validateBet when bet is using free spin &amp; player has available free spin should return true" duration="1"/>
         <testCase name="playerHandler validateBet when bet is free spin &amp; player has NO available free spin should emit invalidFreeSpin to client" duration="0"/>
         <testCase name="playerHandler validateBet when bet is free spin &amp; player has NO available free spin should return false" duration="0"/>
         <testCase name="playerHandler validateBet when bet level is invalid should emit invalidBet to client" duration="1"/>
-        <testCase name="playerHandler validateBet when bet level is invalid should return false" duration="0"/>
+        <testCase name="playerHandler validateBet when bet level is invalid should return false" duration="1"/>
         <testCase name="playerHandler validateBet when coin value is invalid should emit invalidBet to client" duration="0"/>
         <testCase name="playerHandler validateBet when coin value is invalid should return false" duration="0"/>
-        <testCase name="playerHandler validateBet when player does NOT have enough balance should emit notEnoughMoney to client" duration="1"/>
+        <testCase name="playerHandler validateBet when player does NOT have enough balance should emit notEnoughMoney to client" duration="0"/>
         <testCase name="playerHandler validateBet when player does NOT have enough balance should return false" duration="0"/>
-        <testCase name="playerHandler validateBet when bet is valid should return true" duration="0"/>
+        <testCase name="playerHandler validateBet when bet is valid should return true" duration="5"/>
     </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\place-bet-handler.test.ts">
-        <testCase name="placeBetHandler when player is NOT valid should not call placeBet" duration="15"/>
-        <testCase name="placeBetHandler when payload NOT is valid should not call placeBet" duration="1"/>
-        <testCase name="placeBetHandler when payload NOT is valid should emit error to client" duration="0"/>
-        <testCase name="placeBetHandler when params is valid should call player.placeBet" duration="0"/>
+        <testCase name="placeBetHandler when player is NOT valid should not call placeBet" duration="3"/>
+        <testCase name="placeBetHandler when payload NOT is valid should not call placeBet" duration="0"/>
+        <testCase name="placeBetHandler when payload NOT is valid should emit error to client" duration="1"/>
+        <testCase name="placeBetHandler when params is valid should call player.placeBet" duration="1"/>
     </file>
 </testExecutions>

@@ -5,7 +5,7 @@ interface IconOddConfig {
     odds: number;
 }
 
-interface SlotConfig {
+interface CascadingSlotsConfig {
     betLevels: Array<number>;
     coinValues: Array<number>;
     betMultiplier: number;
@@ -17,7 +17,7 @@ interface SlotConfig {
 interface Config {
     name: string;
     defaultBalance: number;
-    slotConfig: SlotConfig;
+    cascadingSlotsConfig: CascadingSlotsConfig;
 }
 
-export { IconOddConfig, SlotConfig, Config };
+export { IconOddConfig, CascadingSlotsConfig, Config };
