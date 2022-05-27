@@ -8,11 +8,11 @@ describe("inGameHandler", () => {
     const socketClientId = chance.guid();
     const socketClient = { id: socketClientId, emit: jest.fn() };
     const gameData = {};
-    const config = { defaultBalance: chance.natural() } as Config;
+    const config = { name: chance.string(), defaultBalance: chance.natural(), cascadingSlotsConfig: {} } as Config;
 
     it("should assign player info to ingame data", () => {
         // Arrange
-        const expectResult = new PlayerHandler(config.defaultBalance, socketClient.emit);
+        const expectResult = new PlayerHandler(config.defaultBalance, expect.any(Function));
 
         // Act
         handleInGame(socketClient as any, gameData, config);
@@ -26,6 +26,19 @@ describe("inGameHandler", () => {
         handleInGame(socketClient as any, gameData, config);
 
         // Assert
-        expect(socketClient.emit).toBeCalledWith("config", config);
+        expect(socketClient.emit).toBeCalledWith(config.name, {
+            gameConfigs: {
+                coinValues: config.cascadingSlotsConfig.coinValues,
+                betLevels: config.cascadingSlotsConfig.betLevels,
+                betMultiplier: config.cascadingSlotsConfig.betMultiplier,
+                odds: { symbols: config.cascadingSlotsConfig.oddsByCounts, freespin: config.cascadingSlotsConfig.freeSpins },
+            },
+            freeSpins: [],
+            user: {
+                balance: config.defaultBalance,
+                rate: 1,
+                multiplier: 0,
+            },
+        });
     });
 });

@@ -19,8 +19,8 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix  && prettier --write '{src}/**/*.ts'",
-    "prebuild": "del-cli --force lib",
-    "build": "tsc -p .",
+    "prebuild": "rimraf lib",
+    "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
     "test-coverage": "jest --collect-coverage",
