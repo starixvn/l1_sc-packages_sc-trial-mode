@@ -15,7 +15,10 @@
     "email": "pentagon@luminetsoft.com",
     "name": "pentagon"
   },
-  "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://git3.nexdev.net/l1/sc-packages/sc-trial-mode.git"
+    },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix  && prettier --write '{src}/**/*.ts'",
