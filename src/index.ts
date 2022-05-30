@@ -7,11 +7,11 @@ import { ProcessQueueJob } from "./handlers/process-queue-handler";
 export class TrialMode {
     private config: Config;
     private readonly gameData: GameData;
-    private readonly getSettleBetResult: Function;
+    private readonly roundCalculator: Object;
     private readonly logError: Function;
 
-    constructor(getSettleBetResult: Function, logError: Function) {
-        this.getSettleBetResult = getSettleBetResult;
+    constructor(roundCalculator: Object, logError: Function) {
+        this.roundCalculator = roundCalculator;
         this.logError = logError;
         this.gameData = {};
     }
@@ -19,7 +19,7 @@ export class TrialMode {
     public init(configs: Config) {
         this.config = configs;
 
-        const processQueueJob = new ProcessQueueJob(this.gameData, this.getSettleBetResult, configs.cascadingSlotsConfig, this.logError);
+        const processQueueJob = new ProcessQueueJob(this.gameData, this.roundCalculator, configs.cascadingSlotsConfig, this.logError);
 
         processQueueJob.run();
     }
@@ -27,6 +27,6 @@ export class TrialMode {
     public registerSocketHandler(socketClient: Socket) {
         socketClient.on("inGame", () => handleInGame(socketClient, this.gameData, this.config));
         socketClient.on("disconnect", () => handleDisconnect(socketClient, this.gameData));
-        socketClient.on("bet", (payload) => handlePlaceBet(payload));
+        socketClient.on("bet", (payload) => handlePlaceBet(socketClient, payload, this.gameData));
     }
 }

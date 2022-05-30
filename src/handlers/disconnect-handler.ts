@@ -4,5 +4,5 @@ import { GameData } from "../models/game-data";
 export const handleDisconnect = (socketClient: Socket, gameData: GameData) => {
     delete gameData[socketClient.id];
 
-    socketClient.emit("disconnect", true);
+    socketClient.disconnect();
 };

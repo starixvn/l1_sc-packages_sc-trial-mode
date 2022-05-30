@@ -2,6 +2,7 @@ import { Bet } from "../models/bet";
 import { CascadingSlotsConfig } from "../models/config";
 import { FreeSpin } from "../models/free-spin";
 import NoticeHelper from "../helpers/notice-helper";
+import { TrialConfigs } from "../trial-configs";
 
 export class PlayerHandler {
     private readonly betQueue: Array<Bet>;
@@ -20,16 +21,20 @@ export class PlayerHandler {
         this.totalMultiplier = 0;
     }
 
+    public isHavingBet() {
+        return this.betQueue.length > 0;
+    }
+
     public placeBet(bet: Bet) {
         this.betQueue.push(bet);
     }
 
-    public async dequeueBets(getSettlementResult: Function, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
+    public async dequeueBets(roundCalculator: Object, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
         if (!this.isProcessing) {
             this.isProcessing = true;
             const bet = this.betQueue.shift();
 
-            this.proceedBet(bet, getSettlementResult, cascadingSlotsConfig)
+            this.proceedBet(bet, roundCalculator, cascadingSlotsConfig)
                 .then(() => (this.isProcessing = false))
                 .catch((err) => {
                     logError(err);
@@ -43,8 +48,8 @@ export class PlayerHandler {
         this.emit(message);
     }
 
-    private async proceedBet(bet: Bet, getSettlementResult: Function, cascadingSlotsConfig: CascadingSlotsConfig) {
-        if (bet && this.validateBet(bet, cascadingSlotsConfig)) {
+    private async proceedBet(bet: Bet, roundCalculator, cascadingSlotsConfig: CascadingSlotsConfig) {
+        if (this.validateBet(bet, cascadingSlotsConfig)) {
             bet.freeSpin = this.freeSpins.available > 0;
 
             if (bet.freeSpin) {
@@ -63,7 +68,7 @@ export class PlayerHandler {
             }
 
             const round = this.generateRoundFromBet(bet, cascadingSlotsConfig);
-            await getSettlementResult(round, this.totalMultiplier);
+            await roundCalculator.processSpinning(round, this.totalMultiplier);
 
             this.collectFreeSpins(round);
             this.collectTotalMultiplier(round);
@@ -146,7 +151,7 @@ export class PlayerHandler {
             return false;
         }
 
-        if (!cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !cascadingSlotsConfig.coinValues.includes(bet.coinValue)) {
+        if (!cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !TrialConfigs.coinValues.includes(bet.coinValue)) {
             this.emitMessage({ errorCode: NoticeHelper.invalidBet });
             return false;
         }
