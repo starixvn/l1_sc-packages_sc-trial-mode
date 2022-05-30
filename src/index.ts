@@ -5,14 +5,21 @@ import { GameData } from "./models/game-data";
 import { ProcessQueueJob } from "./handlers/process-queue-handler";
 
 export class TrialMode {
-    private readonly config: Config;
+    private config: Config;
     private readonly gameData: GameData;
+    private readonly getSettleBetResult: Function;
+    private readonly logError: Function;
 
-    constructor(config: Config, getSettleBetResult: Function, logError: Function) {
-        this.config = config;
+    constructor(getSettleBetResult: Function, logError: Function) {
+        this.getSettleBetResult = getSettleBetResult;
+        this.logError = logError;
         this.gameData = {};
+    }
 
-        const processQueueJob = new ProcessQueueJob(this.gameData, getSettleBetResult, config.cascadingSlotsConfig, logError);
+    public init(configs: Config) {
+        this.config = configs;
+
+        const processQueueJob = new ProcessQueueJob(this.gameData, this.getSettleBetResult, configs.cascadingSlotsConfig, this.logError);
 
         processQueueJob.run();
     }
