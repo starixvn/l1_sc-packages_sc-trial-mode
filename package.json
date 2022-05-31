@@ -31,8 +31,7 @@
     "pub": "npm publish --registry http://npm.lumigame.com",
     "betaver": "npm version prerelease --preid beta",
     "pubbeta": "npm publish --registry http://npm.lumigame.com --tag beta",
-    "semantic-release": "semantic-release",
-    "statistic": "node --experimental-specifier-resolution=node --loader ts-node/esm ./src/statistics/statistic-reporter.ts"
+    "semantic-release": "semantic-release"
   },
   "dependencies": {},
   "devDependencies": {
