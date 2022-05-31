@@ -11,6 +11,7 @@ export class PlayerHandler {
     private balance: number;
     private freeSpins: FreeSpin;
     private totalMultiplier: number;
+    private roundId: number;
 
     constructor(balance: number, emit: Function) {
         this.balance = balance;
@@ -19,6 +20,7 @@ export class PlayerHandler {
         this.betQueue = [];
         this.freeSpins = { available: 0, coinValue: 0, betLevel: 0 };
         this.totalMultiplier = 0;
+        this.roundId = 0;
     }
 
     public isHavingBet() {
@@ -38,6 +40,7 @@ export class PlayerHandler {
                 .then(() => (this.isProcessing = false))
                 .catch((err) => {
                     logError(err);
+                    this.isProcessing = false;
                 });
         } else {
             this.emitMessage({ endBet: -1, errorCode: NoticeHelper.cannotPlaceBet });
@@ -70,11 +73,13 @@ export class PlayerHandler {
             const round = this.generateRoundFromBet(bet, cascadingSlotsConfig);
             await roundCalculator.processSpinning(round, this.totalMultiplier);
 
+            this.roundId++;
+
             this.collectFreeSpins(round);
             this.collectTotalMultiplier(round);
 
             this.balance = this.balance + round.betwin;
-            this.emitMessage({ finish: this.collectRoundResult(round, cascadingSlotsConfig.bigWinRatio) });
+            this.emitMessage({ finish: this.collectRoundResult(round, cascadingSlotsConfig.bigWinRatio), user: { balance: this.balance } });
         }
     }
 
@@ -84,7 +89,7 @@ export class PlayerHandler {
             this.freeSpins.coinValue = round.coinValue;
             this.freeSpins.available = round.settlementResult.freeSpins.odds;
         } else {
-            this.freeSpins.available += round.settlementResult.additionalFreeSpins.odds ?? 0;
+            this.freeSpins.available += round.settlementResult.additionalFreeSpins?.odds ?? 0;
         }
     }
 
@@ -96,10 +101,10 @@ export class PlayerHandler {
 
     private collectRoundResult(round, bigWinRatio: number) {
         return {
-            roundId: round.id,
+            roundId: this.roundId,
             result: round.result,
             win: round.betwin,
-            bigWin: round.totalAmount * bigWinRatio > round.betwin,
+            bigWin: round.totalAmount * bigWinRatio <= round.betwin,
             freeSpins: round.settlementResult.freeSpins.odds,
             tumbles: round.settlementResult.tumbles.map((tumble) => ({
                 icons: tumble.icons,
@@ -126,7 +131,7 @@ export class PlayerHandler {
             coinValue: bet.coinValue,
             bigWin: false,
             odds: {
-                oddsByCount: cascadingSlotsConfig.oddsByCounts,
+                oddsByCounts: cascadingSlotsConfig.oddsByCounts,
                 freeSpins: cascadingSlotsConfig.freeSpins,
             },
             settlementResult: {

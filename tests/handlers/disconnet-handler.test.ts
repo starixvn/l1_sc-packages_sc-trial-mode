@@ -7,7 +7,7 @@ describe("disconnectHandler", () => {
     describe("handleDisconnect", () => {
         const socketClientId = chance.guid();
         const gameData = { [socketClientId]: {} };
-        const socketClient = { emit: jest.fn(), id: socketClientId };
+        const socketClient = { disconnect: jest.fn(), id: socketClientId };
 
         it("should delete player data on game data", () => {
             // Act
@@ -22,7 +22,7 @@ describe("disconnectHandler", () => {
             handleDisconnect(socketClient as any, gameData as any);
 
             // Assert
-            expect(socketClient.emit).toBeCalledWith("disconnect", true);
+            expect(socketClient.disconnect).toBeCalled();
         });
     });
 });

@@ -4,6 +4,7 @@ import { Chance } from "chance";
 import { User } from "../../src/models/game-data";
 import { CascadingSlotsConfig } from "../../src/models/config";
 import noticeHelper from "../../src/helpers/notice-helper";
+import { TrialConfigs } from "../../src/trial-configs";
 
 const chance = new Chance();
 
@@ -18,6 +19,7 @@ const cascadingSlotsConfig = {
 } as CascadingSlotsConfig;
 
 const logError = jest.fn();
+const roundCalculator = { processSpinning: jest.fn() };
 let handler = new PlayerHandler(user.balance, user.emit);
 
 describe("playerHandler", () => {
@@ -41,7 +43,6 @@ describe("playerHandler", () => {
     });
 
     describe("dequeueBets", () => {
-        const getSettleBetResult = jest.fn();
         const cascadingSlotsConfig = {} as CascadingSlotsConfig;
 
         describe("when is NOT processing bet", () => {
@@ -56,7 +57,7 @@ describe("playerHandler", () => {
                     handler.emitMessage = jest.fn();
 
                     // Act
-                    await handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
+                    await handler.dequeueBets(roundCalculator, cascadingSlotsConfig, logError);
 
                     // Assert
                     expect(handler.emitMessage).toBeCalledWith({ endBet: -1, errorCode: noticeHelper.cannotPlaceBet });
@@ -74,15 +75,15 @@ describe("playerHandler", () => {
                     handler["betQueue"].shift = jest.fn().mockReturnValueOnce(bet);
 
                     // Act
-                    handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
+                    handler.dequeueBets(roundCalculator, cascadingSlotsConfig, logError);
 
                     // Assert
-                    expect(handler["proceedBet"]).toBeCalledWith(bet, getSettleBetResult, cascadingSlotsConfig);
+                    expect(handler["proceedBet"]).toBeCalledWith(bet, roundCalculator, cascadingSlotsConfig);
                 });
 
                 it("should set isProcessing to true", () => {
                     // Act
-                    handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
+                    handler.dequeueBets(roundCalculator, cascadingSlotsConfig, logError);
 
                     // Assert
                     expect(handler["isProcessing"]).toBeTruthy();
@@ -94,7 +95,7 @@ describe("playerHandler", () => {
                         handler["proceedBet"] = jest.fn().mockResolvedValue("success");
 
                         // Act
-                        await handler.dequeueBets(getSettleBetResult, cascadingSlotsConfig, logError);
+                        await handler.dequeueBets(roundCalculator, cascadingSlotsConfig, logError);
 
                         // Assert
                         expect(handler["isProcessing"]).toBeFalsy();
@@ -122,12 +123,11 @@ describe("playerHandler", () => {
         const round = {};
         const betwin = chance.natural();
         const bet: Bet = { betLevel: 10, coinValue: 0.5, freeSpin: chance.bool() };
-        let getSettlementResult;
 
         beforeEach(() => {
             handler.emitMessage = jest.fn();
             handler["generateRoundFromBet"] = jest.fn().mockReturnValueOnce(round);
-            getSettlementResult = jest.fn().mockImplementation((round) => {
+            roundCalculator.processSpinning.mockImplementation((round) => {
                 round.betwin = betwin;
             });
         });
@@ -153,7 +153,7 @@ describe("playerHandler", () => {
 
                 it("should deduct available free spins", async () => {
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(freeSpinData.available).toBe(2);
@@ -161,7 +161,7 @@ describe("playerHandler", () => {
 
                 it("should update bet", async () => {
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(bet).toStrictEqual({ betLevel: freeSpinData.betLevel, coinValue: freeSpinData.coinValue, freeSpin: true });
@@ -172,7 +172,7 @@ describe("playerHandler", () => {
                     const currentBalance = handler["balance"];
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["emitMessage"]).toHaveBeenNthCalledWith(1, { endBet: 0, freeSpin: true, user: { balance: currentBalance } });
@@ -187,7 +187,7 @@ describe("playerHandler", () => {
                     handler["totalMultiplier"] = 4;
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["totalMultiplier"]).toBe(0);
@@ -197,10 +197,12 @@ describe("playerHandler", () => {
                     // Arrange
                     const prevBalance = handler["balance"];
                     const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
-                    getSettlementResult = jest.fn().mockResolvedValueOnce({ betwin: 0 });
+                    roundCalculator.processSpinning.mockImplementationOnce((round) => {
+                        round.betwin = 0;
+                    });
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["balance"]).toBe(prevBalance - betAmount);
@@ -209,9 +211,12 @@ describe("playerHandler", () => {
                 it("should emit success bet", async () => {
                     // Arrange
                     const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
+                    roundCalculator.processSpinning.mockImplementationOnce((round) => {
+                        round.betwin = 0;
+                    });
 
                     // Act
-                    await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                    await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                     // Assert
                     expect(handler["emitMessage"]).toBeCalledWith({ endBet: betAmount, user: { balance: handler["balance"] } });
@@ -220,27 +225,27 @@ describe("playerHandler", () => {
 
             it("should call generateRoundFromBet", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["generateRoundFromBet"]).toBeCalledWith(bet, cascadingSlotsConfig);
             });
 
-            it("should call getSettlementResult", async () => {
+            it("should call roundCalculator.processSpinning", async () => {
                 // Arrange
                 const mockRound = { ...bet };
                 handler["generateRoundFromBet"] = jest.fn().mockReturnValueOnce(mockRound);
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
-                expect(getSettlementResult).toBeCalledWith(mockRound, handler["totalMultiplier"]);
+                expect(roundCalculator.processSpinning).toBeCalledWith(mockRound, handler["totalMultiplier"]);
             });
 
             it("should call collect free spins", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["collectFreeSpins"]).toBeCalledWith(round);
@@ -248,7 +253,7 @@ describe("playerHandler", () => {
 
             it("should call collect free spins", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["collectTotalMultiplier"]).toBeCalledWith(round);
@@ -259,12 +264,12 @@ describe("playerHandler", () => {
                 const prevBalance = handler["balance"];
                 const betwin = chance.natural();
                 const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
-                getSettlementResult = jest.fn().mockImplementation((round) => {
+                roundCalculator.processSpinning.mockImplementation((round) => {
                     round.betwin = betwin;
                 });
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["balance"]).toBe(prevBalance - betAmount + betwin);
@@ -272,7 +277,7 @@ describe("playerHandler", () => {
 
             it("should call collectRoundResult", async () => {
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
                 expect(handler["collectRoundResult"]).toBeCalledWith(round, cascadingSlotsConfig.bigWinRatio);
@@ -287,10 +292,10 @@ describe("playerHandler", () => {
                 handler["collectRoundResult"] = jest.fn().mockReturnValueOnce(roundResult);
 
                 // Act
-                await handler["proceedBet"](bet, getSettlementResult, cascadingSlotsConfig);
+                await handler["proceedBet"](bet, roundCalculator, cascadingSlotsConfig);
 
                 // Assert
-                expect(handler.emitMessage).toBeCalledWith({ finish: roundResult });
+                expect(handler.emitMessage).toBeCalledWith({ finish: roundResult, user: { balance: handler["balance"] } });
             });
         });
     });
@@ -473,7 +478,7 @@ describe("playerHandler", () => {
         describe("when player does NOT have enough balance", () => {
             const bet: Bet = {
                 betLevel: chance.pickone(cascadingSlotsConfig.betLevels),
-                coinValue: chance.pickone(cascadingSlotsConfig.coinValues),
+                coinValue: chance.pickone(TrialConfigs.coinValues),
             };
 
             beforeEach(() => {
@@ -502,7 +507,7 @@ describe("playerHandler", () => {
                 // Arrange
                 const bet: Bet = {
                     betLevel: chance.pickone(cascadingSlotsConfig.betLevels),
-                    coinValue: chance.pickone(cascadingSlotsConfig.coinValues),
+                    coinValue: chance.pickone(TrialConfigs.coinValues),
                 };
                 handler["balance"] = 2000;
 

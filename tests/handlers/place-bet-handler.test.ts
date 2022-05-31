@@ -8,11 +8,13 @@ jest.mock("../../src/handlers/player-handler");
 describe("placeBetHandler", () => {
     const chance = new Chance();
     const player = new PlayerHandler(2000, jest.fn());
+    const socketClient = { id: chance.guid(), emit: jest.fn() };
+    const gameData = { [socketClient.id]: player };
 
     describe("when player is NOT valid", () => {
         it("should not call placeBet", () => {
             // Act
-            handlePlaceBet({ payload: { betLevel: chance.natural(), coinValue: chance.natural(), freeSpin: chance.bool() }, player: undefined });
+            handlePlaceBet(socketClient as any, { betLevel: chance.natural(), coinValue: chance.natural(), freeSpin: chance.bool() }, {});
 
             // Assert
             expect(player.placeBet).not.toBeCalled();
@@ -22,7 +24,7 @@ describe("placeBetHandler", () => {
     describe("when payload NOT is valid", () => {
         it("should not call placeBet", () => {
             // Act
-            handlePlaceBet({ payload: undefined, player });
+            handlePlaceBet(socketClient as any, undefined, gameData);
 
             // Assert
             expect(player.placeBet).not.toBeCalled();
@@ -30,7 +32,7 @@ describe("placeBetHandler", () => {
 
         it("should emit error to client", () => {
             // Act
-            handlePlaceBet({ payload: undefined, player: player });
+            handlePlaceBet(socketClient as any, undefined, gameData);
 
             // Assert
             expect(player.emitMessage).toBeCalledWith({ errorCode: noticeHelper.invalidBet });
@@ -43,7 +45,7 @@ describe("placeBetHandler", () => {
             const payload = { betLevel: chance.natural(), coinValue: chance.natural(), freeSpin: chance.bool() };
 
             // Act
-            handlePlaceBet({ payload, player });
+            handlePlaceBet(socketClient as any, payload, gameData);
 
             // Assert
             expect(player.placeBet).toBeCalledWith(payload);

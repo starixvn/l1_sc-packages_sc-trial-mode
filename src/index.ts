@@ -3,6 +3,7 @@ import { Config } from "./models/config";
 import { Socket } from "socket.io";
 import { GameData } from "./models/game-data";
 import { ProcessQueueJob } from "./handlers/process-queue-handler";
+import { handleSignIn } from "./handlers/sign-in-handler";
 
 export class TrialMode {
     private config: Config;
@@ -28,5 +29,6 @@ export class TrialMode {
         socketClient.on("inGame", () => handleInGame(socketClient, this.gameData, this.config));
         socketClient.on("disconnect", () => handleDisconnect(socketClient, this.gameData));
         socketClient.on("bet", (payload) => handlePlaceBet(socketClient, payload, this.gameData));
+        socketClient.on("signin", () => handleSignIn(socketClient, this.config));
     }
 }

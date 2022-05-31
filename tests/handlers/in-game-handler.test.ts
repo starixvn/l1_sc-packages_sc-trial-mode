@@ -2,17 +2,18 @@ import { handleInGame } from "../../src/handlers/in-game-handler";
 import { Chance } from "chance";
 import { Config } from "../../src/models/config";
 import { PlayerHandler } from "../../src/handlers/player-handler";
+import { TrialConfigs } from "../../src/trial-configs";
 
 describe("inGameHandler", () => {
     const chance = new Chance();
     const socketClientId = chance.guid();
     const socketClient = { id: socketClientId, emit: jest.fn() };
     const gameData = {};
-    const config = { name: chance.string(), defaultBalance: chance.natural(), cascadingSlotsConfig: {} } as Config;
+    const config = { name: chance.string(), cascadingSlotsConfig: {} } as Config;
 
     it("should assign player info to ingame data", () => {
         // Arrange
-        const expectResult = new PlayerHandler(config.defaultBalance, expect.any(Function));
+        const expectResult = new PlayerHandler(TrialConfigs.defaultBalance, expect.any(Function));
 
         // Act
         handleInGame(socketClient as any, gameData, config);
@@ -28,14 +29,14 @@ describe("inGameHandler", () => {
         // Assert
         expect(socketClient.emit).toBeCalledWith(config.name, {
             gameConfigs: {
-                coinValues: config.cascadingSlotsConfig.coinValues,
+                coinValues: TrialConfigs.coinValues,
                 betLevels: config.cascadingSlotsConfig.betLevels,
                 betMultiplier: config.cascadingSlotsConfig.betMultiplier,
                 odds: { symbols: config.cascadingSlotsConfig.oddsByCounts, freespin: config.cascadingSlotsConfig.freeSpins },
             },
             freeSpins: [],
             user: {
-                balance: config.defaultBalance,
+                balance: TrialConfigs.defaultBalance,
                 rate: 1,
                 multiplier: 0,
             },
