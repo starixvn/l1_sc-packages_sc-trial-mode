@@ -3,6 +3,7 @@ import { CascadingSlotsConfig } from "../models/config";
 import { FreeSpin } from "../models/free-spin";
 import NoticeHelper from "../helpers/notice-helper";
 import { TrialConfigs } from "../trial-configs";
+import { Round } from "../models/round";
 
 export class PlayerHandler {
     private readonly betQueue: Array<Bet>;
@@ -83,7 +84,7 @@ export class PlayerHandler {
         }
     }
 
-    private collectFreeSpins(round) {
+    private collectFreeSpins(round: Round) {
         if (round.settlementResult.freeSpins.odds) {
             this.freeSpins.betLevel = round.betLevel;
             this.freeSpins.coinValue = round.coinValue;
@@ -93,19 +94,20 @@ export class PlayerHandler {
         }
     }
 
-    private collectTotalMultiplier(round) {
+    private collectTotalMultiplier(round: Round) {
         if (round.freeSpin) {
             this.totalMultiplier += round.multiplier ?? 0;
         }
     }
 
-    private collectRoundResult(round, bigWinRatio: number) {
+    private collectRoundResult(round: Round, bigWinRatio: number) {
         return {
             roundId: this.roundId,
             result: round.result,
             win: round.betwin,
             bigWin: round.totalAmount * bigWinRatio <= round.betwin,
             freeSpins: round.settlementResult.freeSpins.odds,
+            totalFreeSpins: this.freeSpins.available,
             tumbles: round.settlementResult.tumbles.map((tumble) => ({
                 icons: tumble.icons,
                 win: tumble.win,
@@ -121,7 +123,7 @@ export class PlayerHandler {
         };
     }
 
-    private generateRoundFromBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig) {
+    private generateRoundFromBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig): Round {
         return {
             freeSpin: bet.freeSpin,
             bet: bet.betLevel * bet.coinValue,
@@ -134,7 +136,9 @@ export class PlayerHandler {
                 oddsByCounts: cascadingSlotsConfig.oddsByCounts,
                 freeSpins: cascadingSlotsConfig.freeSpins,
             },
+            totalFreeSpins: 0,
             settlementResult: {
+                tumbles: [],
                 freeSpins: { count: 0, odds: 0 },
                 additionalFreeSpins: { count: 0, odds: 0 },
             },

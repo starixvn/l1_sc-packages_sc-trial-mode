@@ -5,6 +5,7 @@ import { User } from "../../src/models/game-data";
 import { CascadingSlotsConfig } from "../../src/models/config";
 import noticeHelper from "../../src/helpers/notice-helper";
 import { TrialConfigs } from "../../src/trial-configs";
+import { Round } from "../../src/models/round";
 
 const chance = new Chance();
 
@@ -314,7 +315,7 @@ describe("playerHandler", () => {
 
             it("should set player freeSpins.betLevel", () => {
                 // Act
-                handler["collectFreeSpins"](round);
+                handler["collectFreeSpins"](round as Round);
 
                 // Assert
                 expect(handler["freeSpins"].betLevel).toBe(round.betLevel);
@@ -322,7 +323,7 @@ describe("playerHandler", () => {
 
             it("should set player freeSpins.coinValue", () => {
                 // Act
-                handler["collectFreeSpins"](round);
+                handler["collectFreeSpins"](round as Round);
 
                 // Assert
                 expect(handler["freeSpins"].coinValue).toBe(round.coinValue);
@@ -330,7 +331,7 @@ describe("playerHandler", () => {
 
             it("should set player freeSpins.available", () => {
                 // Act
-                handler["collectFreeSpins"](round);
+                handler["collectFreeSpins"](round as Round);
 
                 // Assert
                 expect(handler["freeSpins"].available).toBe(round.settlementResult.freeSpins.odds);
@@ -352,7 +353,7 @@ describe("playerHandler", () => {
                 };
 
                 // Act
-                handler["collectFreeSpins"](round);
+                handler["collectFreeSpins"](round as Round);
 
                 // Assert
                 expect(handler["freeSpins"].available).toBe(availableFreeSpins + additionalFreeSpins);
@@ -372,7 +373,7 @@ describe("playerHandler", () => {
                 handler["totalMultiplier"] = currentTotalMultiplier;
 
                 // Act
-                handler["collectTotalMultiplier"](round);
+                handler["collectTotalMultiplier"](round as Round);
 
                 // Assert
                 expect(handler["totalMultiplier"]).toBe(currentTotalMultiplier + round.multiplier);
