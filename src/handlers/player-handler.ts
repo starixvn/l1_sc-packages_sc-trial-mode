@@ -1,27 +1,23 @@
-import { Bet } from "../models/bet";
-import { CascadingSlotsConfig } from "../models/config";
-import { FreeSpin } from "../models/free-spin";
+import { CascadingSlotsConfig, Bet, RoundCalculator } from "../models";
 import NoticeHelper from "../helpers/notice-helper";
 import { TrialConfigs } from "../trial-configs";
-import { Round } from "../models/round";
+import { FreeSpinHandler, GameRoundHandler } from "./";
 
 export class PlayerHandler {
     private readonly betQueue: Array<Bet>;
     private readonly emit: Function;
     private isProcessing: boolean;
     private balance: number;
-    private freeSpins: FreeSpin;
-    private totalMultiplier: number;
-    private roundId: number;
+    private freeSpinHandler: FreeSpinHandler;
+    private gameRoundHandler: GameRoundHandler;
 
-    constructor(balance: number, emit: Function) {
-        this.balance = balance;
+    constructor(cascadingSlotsConfig: CascadingSlotsConfig, emit: Function) {
+        this.balance = TrialConfigs.defaultBalance;
         this.emit = emit;
         this.isProcessing = false;
         this.betQueue = [];
-        this.freeSpins = { available: 0, coinValue: 0, betLevel: 0 };
-        this.totalMultiplier = 0;
-        this.roundId = 0;
+        this.freeSpinHandler = new FreeSpinHandler();
+        this.gameRoundHandler = new GameRoundHandler(this.freeSpinHandler, cascadingSlotsConfig);
     }
 
     public isHavingBet() {
@@ -32,19 +28,37 @@ export class PlayerHandler {
         this.betQueue.push(bet);
     }
 
-    public async dequeueBets(roundCalculator: Object, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
-        if (!this.isProcessing) {
-            this.isProcessing = true;
-            const bet = this.betQueue.shift();
+    public async dequeueBets(roundCalculator: RoundCalculator, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
+        const bet = this.getBetFromQueue();
 
-            this.proceedBet(bet, roundCalculator, cascadingSlotsConfig)
-                .then(() => (this.isProcessing = false))
+        if (this.validateBet(bet, cascadingSlotsConfig)) {
+            const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
+
+            if (bet.freeSpin) {
+                this.freeSpinHandler.useFreeSpin();
+            } else {
+                this.balance -= betAmount;
+            }
+
+            this.emitMessage({ endBet: betAmount, freeSpin: bet.freeSpin, user: { balance: this.balance } });
+
+            this.isProcessing = true;
+
+            this.gameRoundHandler
+                .settle(bet, roundCalculator)
+                .then((settlementResult) => {
+                    this.balance = this.balance + settlementResult.win;
+                    this.emitMessage({
+                        finish: settlementResult,
+                        user: { balance: this.balance },
+                    });
+                })
                 .catch((err) => {
                     logError(err);
+                })
+                .finally(() => {
                     this.isProcessing = false;
                 });
-        } else {
-            this.emitMessage({ endBet: -1, errorCode: NoticeHelper.cannotPlaceBet });
         }
     }
 
@@ -52,121 +66,61 @@ export class PlayerHandler {
         this.emit(message);
     }
 
-    private async proceedBet(bet: Bet, roundCalculator, cascadingSlotsConfig: CascadingSlotsConfig) {
-        if (this.validateBet(bet, cascadingSlotsConfig)) {
-            bet.freeSpin = this.freeSpins.available > 0;
+    private getBetFromQueue() {
+        const bet = this.betQueue.shift();
 
-            if (bet.freeSpin) {
-                bet.betLevel = this.freeSpins.betLevel;
-                bet.coinValue = this.freeSpins.coinValue;
-                this.freeSpins.available--;
+        bet.freeSpin = this.freeSpinHandler.getAvailableFreeSpins() > 0;
 
-                this.emitMessage({ endBet: 0, freeSpin: true, user: { balance: this.balance } });
-            } else {
-                const betAmount = bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier;
+        if (bet.freeSpin) {
+            const { betLevel, coinValue } = this.freeSpinHandler.getFreeSpinData();
 
-                this.totalMultiplier = 0;
-                this.balance -= betAmount;
-
-                this.emitMessage({ endBet: betAmount, user: { balance: this.balance } });
-            }
-
-            const round = this.generateRoundFromBet(bet, cascadingSlotsConfig);
-            await roundCalculator.processSpinning(round, this.totalMultiplier);
-
-            this.roundId++;
-
-            this.collectFreeSpins(round);
-            this.collectTotalMultiplier(round);
-
-            this.balance = this.balance + round.betwin;
-            this.emitMessage({ finish: this.collectRoundResult(round, cascadingSlotsConfig.bigWinRatio), user: { balance: this.balance } });
-        }
-    }
-
-    private collectFreeSpins(round: Round) {
-        if (round.settlementResult.freeSpins.odds) {
-            this.freeSpins.betLevel = round.betLevel;
-            this.freeSpins.coinValue = round.coinValue;
-            this.freeSpins.available = round.settlementResult.freeSpins.odds;
+            bet.betLevel = betLevel;
+            bet.coinValue = coinValue;
         } else {
-            this.freeSpins.available += round.settlementResult.additionalFreeSpins?.odds ?? 0;
+            this.freeSpinHandler.resetTotalMultiplier();
         }
+
+        return bet;
     }
 
-    private collectTotalMultiplier(round: Round) {
-        if (round.freeSpin) {
-            this.totalMultiplier += round.multiplier ?? 0;
-        }
-    }
+    private composeValidationCriteria(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig) {
+        const availableFreeSpins = this.freeSpinHandler.getAvailableFreeSpins();
 
-    private collectRoundResult(round: Round, bigWinRatio: number) {
-        return {
-            roundId: this.roundId,
-            result: round.result,
-            win: round.betwin,
-            bigWin: round.totalAmount * bigWinRatio <= round.betwin,
-            freeSpins: round.settlementResult.freeSpins.odds,
-            totalFreeSpins: this.freeSpins.available,
-            tumbles: round.settlementResult.tumbles.map((tumble) => ({
-                icons: tumble.icons,
-                win: tumble.win,
-                result: tumble.newBoard,
-                multipliers: tumble.multipliers,
-                settlement: {
-                    explode: tumble.explodedSymbols,
-                    new: tumble.newSymbols,
-                },
-            })),
-            multiplier: round.multiplier,
-            totalMultiplier: round.totalMultiplier,
-        };
-    }
-
-    private generateRoundFromBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig): Round {
-        return {
-            freeSpin: bet.freeSpin,
-            bet: bet.betLevel * bet.coinValue,
-            totalAmount: bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier,
-            betMultiplier: cascadingSlotsConfig.betMultiplier,
-            betLevel: bet.betLevel,
-            coinValue: bet.coinValue,
-            bigWin: false,
-            odds: {
-                oddsByCounts: cascadingSlotsConfig.oddsByCounts,
-                freeSpins: cascadingSlotsConfig.freeSpins,
+        return [
+            {
+                failure: this.isProcessing,
+                errorCode: NoticeHelper.cannotPlaceBet,
             },
-            totalFreeSpins: 0,
-            settlementResult: {
-                tumbles: [],
-                freeSpins: { count: 0, odds: 0 },
-                additionalFreeSpins: { count: 0, odds: 0 },
+            {
+                failure: bet.freeSpin && availableFreeSpins <= 0,
+                errorCode: NoticeHelper.invalidFreeSpin,
             },
-            betwin: 0,
-            totalMultiplier: 0,
-            totalTumbleWin: 0,
-            multiplier: 0,
-            result: "",
-        };
+            {
+                failure: !cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !TrialConfigs.coinValues.includes(bet.coinValue),
+                errorCode: NoticeHelper.invalidBet,
+            },
+            {
+                failure: bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier > this.balance,
+                errorCode: NoticeHelper.notEnoughMoney,
+            },
+        ];
     }
 
     private validateBet(bet: Bet, cascadingSlotsConfig: CascadingSlotsConfig) {
-        if (bet.freeSpin && this.freeSpins.available > 0) {
+        const availableFreeSpins = this.freeSpinHandler.getAvailableFreeSpins();
+
+        const isValidFreeSpin = bet.freeSpin && availableFreeSpins;
+
+        if (isValidFreeSpin) {
             return true;
         }
 
-        if (bet.freeSpin && this.freeSpins.available <= 0) {
-            this.emitMessage({ errorCode: NoticeHelper.invalidFreeSpin });
-            return false;
-        }
+        const criteria = this.composeValidationCriteria(bet, cascadingSlotsConfig);
+        const failedCriterion = criteria.find((criterion) => criterion.failure);
 
-        if (!cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !TrialConfigs.coinValues.includes(bet.coinValue)) {
-            this.emitMessage({ errorCode: NoticeHelper.invalidBet });
-            return false;
-        }
+        if (failedCriterion) {
+            this.emitMessage({ endBet: -1, errorCode: failedCriterion.errorCode });
 
-        if (bet.betLevel * bet.coinValue * cascadingSlotsConfig.betMultiplier > this.balance) {
-            this.emitMessage({ errorCode: NoticeHelper.notEnoughMoney });
             return false;
         }
 

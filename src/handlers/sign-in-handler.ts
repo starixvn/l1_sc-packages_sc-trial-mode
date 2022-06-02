@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { Config } from "../models/config";
+import { Config } from "../models";
 
 export const handleSignIn = (socketClient: Socket, config: Config) => {
     socketClient.emit(config.name, "signedIn");

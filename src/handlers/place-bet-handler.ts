@@ -1,7 +1,6 @@
 import { Socket } from "socket.io";
 import NoticeHelper from "../helpers/notice-helper";
-import { Bet } from "../models/bet";
-import { GameData } from "../models/game-data";
+import { GameData, Bet } from "../models";
 
 export const handlePlaceBet = (socketClient: Socket, payload: Bet, gameData: GameData) => {
     const player = gameData[socketClient.id];
@@ -9,6 +8,6 @@ export const handlePlaceBet = (socketClient: Socket, payload: Bet, gameData: Gam
     if (payload && player) {
         player.placeBet(payload);
     } else {
-        player?.emitMessage({ errorCode: NoticeHelper.invalidBet });
+        player?.emitMessage({ endBet: -1, errorCode: NoticeHelper.invalidBet });
     }
 };

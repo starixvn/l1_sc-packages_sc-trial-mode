@@ -2,16 +2,17 @@ import { handleInGame, handleDisconnect, handlePlaceBet } from "./handlers";
 import { Config } from "./models/config";
 import { Socket } from "socket.io";
 import { GameData } from "./models/game-data";
-import { ProcessQueueJob } from "./handlers/process-queue-handler";
+import { ProcessQueueJob } from "./crons/process-queue";
 import { handleSignIn } from "./handlers/sign-in-handler";
+import { RoundCalculator } from "./models/roundCalculator";
 
 export class TrialMode {
     private config: Config;
     private readonly gameData: GameData;
-    private readonly roundCalculator: Object;
+    private readonly roundCalculator: RoundCalculator;
     private readonly logError: Function;
 
-    constructor(roundCalculator: Object, logError: Function) {
+    constructor(roundCalculator: RoundCalculator, logError: Function) {
         this.roundCalculator = roundCalculator;
         this.logError = logError;
         this.gameData = {};

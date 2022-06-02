@@ -1,14 +1,13 @@
-import { CascadingSlotsConfig } from "../models/config";
-import { GameData } from "../models/game-data";
+import { CascadingSlotsConfig, GameData, RoundCalculator } from "../models";
 
 export class ProcessQueueJob {
     private readonly gameData: GameData;
-    private readonly roundCalculator: Object;
+    private readonly roundCalculator: RoundCalculator;
     private readonly cascadingSlotsConfig: CascadingSlotsConfig;
     private readonly processInterval = 50;
     private readonly logError: Function;
 
-    constructor(gameData: GameData, roundCalculator: Object, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
+    constructor(gameData: GameData, roundCalculator: RoundCalculator, cascadingSlotsConfig: CascadingSlotsConfig, logError: Function) {
         this.gameData = gameData;
         this.roundCalculator = roundCalculator;
         this.cascadingSlotsConfig = cascadingSlotsConfig;
