@@ -19,7 +19,7 @@ export const handleInGame = (socketClient: Socket, gameData: GameData, config: C
         gameConfigs,
         freeSpins: [],
         totalMultiplier: 0,
-        user: {
+        trialUser: {
             balance: TrialConfigs.defaultBalance,
             rate: 1,
             multiplier: 1,

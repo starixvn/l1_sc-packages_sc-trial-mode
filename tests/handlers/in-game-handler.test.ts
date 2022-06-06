@@ -13,7 +13,7 @@ describe("inGameHandler", () => {
 
     it("should assign player info to ingame data", () => {
         // Arrange
-        const expectResult = new PlayerHandler(TrialConfigs.defaultBalance, expect.any(Function));
+        const expectResult = new PlayerHandler(config.cascadingSlotsConfig, expect.any(Function));
 
         // Act
         handleInGame(socketClient as any, gameData, config);
@@ -34,11 +34,12 @@ describe("inGameHandler", () => {
                 betMultiplier: config.cascadingSlotsConfig.betMultiplier,
                 odds: { symbols: config.cascadingSlotsConfig.oddsByCounts, freespin: config.cascadingSlotsConfig.freeSpins },
             },
+            totalMultiplier: 0,
             freeSpins: [],
-            user: {
+            trialUser: {
                 balance: TrialConfigs.defaultBalance,
                 rate: 1,
-                multiplier: 0,
+                multiplier: 1,
             },
         });
     });

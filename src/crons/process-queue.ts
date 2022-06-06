@@ -17,7 +17,7 @@ export class ProcessQueueJob {
     public run() {
         const keepDequeue = () => {
             Object.values(this.gameData).forEach((user) => {
-                user && user.isHavingBet() && user.dequeueBets(this.roundCalculator, this.cascadingSlotsConfig, this.logError);
+                user && user.isHavingBet() && user.dequeueBets(this.roundCalculator, this.logError);
             });
 
             setTimeout(() => keepDequeue(), this.processInterval);

@@ -2,12 +2,14 @@ import { handlePlaceBet } from "../../src/handlers";
 import { PlayerHandler } from "../../src/handlers/player-handler";
 import noticeHelper from "../../src/helpers/notice-helper";
 import { Chance } from "chance";
+import { CascadingSlotsConfig } from "../../src/models";
 
 jest.mock("../../src/handlers/player-handler");
 
 describe("placeBetHandler", () => {
     const chance = new Chance();
-    const player = new PlayerHandler(2000, jest.fn());
+    const cascadingSlotsConfig = {} as CascadingSlotsConfig;
+    const player = new PlayerHandler(cascadingSlotsConfig, jest.fn());
     const socketClient = { id: chance.guid(), emit: jest.fn() };
     const gameData = { [socketClient.id]: player };
 
@@ -35,7 +37,7 @@ describe("placeBetHandler", () => {
             handlePlaceBet(socketClient as any, undefined, gameData);
 
             // Assert
-            expect(player.emitMessage).toBeCalledWith({ errorCode: noticeHelper.invalidBet });
+            expect(player.emitMessage).toBeCalledWith({ endBet: -1, errorCode: noticeHelper.invalidBet });
         });
     });
 
