@@ -35,7 +35,7 @@ export class GameRoundHandler {
     }
 
     private collectTotalMultiplier(round: Round) {
-        this.freeSpinHandler.increaseTotalMultiplier(round.multiplier ?? 0);
+        round.betwin && this.freeSpinHandler.increaseTotalMultiplier(round.multiplier ?? 0);
     }
 
     private collectRoundResult(round: Round) {
