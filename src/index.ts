@@ -21,7 +21,7 @@ export class TrialMode {
     public init(configs: Config) {
         this.config = configs;
 
-        const processQueueJob = new ProcessQueueJob(this.gameData, this.roundCalculator, configs.cascadingSlotsConfig, this.logError);
+        const processQueueJob = new ProcessQueueJob(this.gameData, this.roundCalculator, this.logError);
 
         processQueueJob.run();
     }

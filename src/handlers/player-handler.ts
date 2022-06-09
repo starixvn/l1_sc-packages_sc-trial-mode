@@ -1,4 +1,4 @@
-import { CascadingSlotsConfig, Bet, RoundCalculator } from "../models";
+import { CascadingSlotsConfig, Bet, RoundCalculator, Config } from "../models";
 import NoticeHelper from "../helpers/notice-helper";
 import { TrialConfigs } from "../trial-configs";
 import { FreeSpinHandler, GameRoundHandler } from "./";
@@ -12,14 +12,14 @@ export class PlayerHandler {
     private gameRoundHandler: GameRoundHandler;
     private cascadingSlotsConfig: CascadingSlotsConfig;
 
-    constructor(cascadingSlotsConfig: CascadingSlotsConfig, emit: Function) {
-        this.balance = TrialConfigs.defaultBalance;
+    constructor(config: Config, emit: Function) {
+        this.balance = config.defaultBalance ?? TrialConfigs.defaultBalance;
         this.emit = emit;
         this.isProcessing = false;
         this.betQueue = [];
         this.freeSpinHandler = new FreeSpinHandler();
-        this.cascadingSlotsConfig = cascadingSlotsConfig;
-        this.gameRoundHandler = new GameRoundHandler(this.freeSpinHandler, cascadingSlotsConfig);
+        this.cascadingSlotsConfig = config.cascadingSlotsConfig;
+        this.gameRoundHandler = new GameRoundHandler(this.freeSpinHandler, config.cascadingSlotsConfig);
     }
 
     public isHavingBet() {

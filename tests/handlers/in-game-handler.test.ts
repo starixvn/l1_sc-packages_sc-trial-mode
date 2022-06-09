@@ -13,7 +13,7 @@ describe("inGameHandler", () => {
 
     it("should assign player info to ingame data", () => {
         // Arrange
-        const expectResult = new PlayerHandler(config.cascadingSlotsConfig, expect.any(Function));
+        const expectResult = new PlayerHandler(config, expect.any(Function));
 
         // Act
         handleInGame(socketClient as any, gameData, config);

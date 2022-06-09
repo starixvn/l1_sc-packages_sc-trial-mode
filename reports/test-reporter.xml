@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\disconnet-handler.test.ts">
-        <testCase name="disconnectHandler handleDisconnect should delete player data on game data" duration="4"/>
-        <testCase name="disconnectHandler handleDisconnect should emit disconnect to client" duration="2"/>
-    </file>
-    <file path="D:\Lumi\sc-trial-mode\tests\handlers\in-game-handler.test.ts">
-        <testCase name="inGameHandler should assign player info to ingame data" duration="6"/>
-        <testCase name="inGameHandler should emit config to client" duration="3"/>
-    </file>
-    <file path="D:\Lumi\sc-trial-mode\tests\handlers\place-bet-handler.test.ts">
-        <testCase name="placeBetHandler when player is NOT valid should not call placeBet" duration="1"/>
-        <testCase name="placeBetHandler when payload NOT is valid should not call placeBet" duration="1"/>
-        <testCase name="placeBetHandler when payload NOT is valid should emit error to client" duration="1"/>
-        <testCase name="placeBetHandler when params is valid should call player.placeBet" duration="1"/>
-    </file>
-    <file path="D:\Lumi\sc-trial-mode\tests\handlers\free-spin-handler.test.ts">
-        <testCase name="freeSpinHandler getFreeSpinData should return freeSpins" duration="2"/>
-        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins should decrease available freeSpins by one" duration="1"/>
-        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins when having no freeSpins after using should call resetTotalMultiplier" duration="2"/>
-        <testCase name="freeSpinHandler gainFreeSpins when have available freeSpins should increase available freeSpins" duration="0"/>
-        <testCase name="freeSpinHandler gainFreeSpins when have no available freSpins should assign new freeSpin" duration="1"/>
-        <testCase name="freeSpinHandler getAvailableFreeSpins should return available freeSpins" duration="0"/>
-        <testCase name="freeSpinHandler increaseTotalMultiplier should increase total multiplier" duration="1"/>
-        <testCase name="freeSpinHandler getCurrentTotalMultiplier should return current total multiplier" duration="0"/>
+        <testCase name="disconnectHandler handleDisconnect should delete player data on game data" duration="3"/>
+        <testCase name="disconnectHandler handleDisconnect should emit disconnect to client" duration="1"/>
     </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\player-handler.test.ts">
-        <testCase name="playerHandler placeBet should call betQueue.push" duration="4"/>
+        <testCase name="playerHandler placeBet should call betQueue.push" duration="2"/>
         <testCase name="playerHandler isHavingBet should return true when having bet" duration="0"/>
     </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\in-game-handler.test.ts">
+        <testCase name="inGameHandler should assign player info to ingame data" duration="5"/>
+        <testCase name="inGameHandler should emit config to client" duration="1"/>
+    </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\sign-in-handler.test.ts">
-        <testCase name="signInHandler handleSignIn should emit signedIn" duration="4"/>
-        <testCase name="signInHandler handleSignIn should emit toGame" duration="1"/>
+        <testCase name="signInHandler handleSignIn should emit signedIn" duration="3"/>
+        <testCase name="signInHandler handleSignIn should emit toGame" duration="0"/>
     </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\game-round-handler.test.ts">
-        <testCase name="gameRoundHandler settle should call generateRoundFromBet" duration="4"/>
+        <testCase name="gameRoundHandler settle should call generateRoundFromBet" duration="3"/>
         <testCase name="gameRoundHandler settle should call roundCalculator.processSpinning" duration="1"/>
         <testCase name="gameRoundHandler settle should call collectFreeSpins" duration="1"/>
         <testCase name="gameRoundHandler settle should call collectTotalMultiplier" duration="1"/>
-        <testCase name="gameRoundHandler settle should return round result" duration="2"/>
+        <testCase name="gameRoundHandler settle should return round result" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\free-spin-handler.test.ts">
+        <testCase name="freeSpinHandler getFreeSpinData should return freeSpins" duration="3"/>
+        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins should decrease available freeSpins by one" duration="0"/>
+        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins when having no freeSpins after using should call resetTotalMultiplier" duration="1"/>
+        <testCase name="freeSpinHandler gainFreeSpins when have available freeSpins should increase available freeSpins" duration="0"/>
+        <testCase name="freeSpinHandler gainFreeSpins when have no available freSpins should assign new freeSpin" duration="0"/>
+        <testCase name="freeSpinHandler getAvailableFreeSpins should return available freeSpins" duration="0"/>
+        <testCase name="freeSpinHandler increaseTotalMultiplier should increase total multiplier" duration="0"/>
+        <testCase name="freeSpinHandler getCurrentTotalMultiplier should return current total multiplier" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\place-bet-handler.test.ts">
+        <testCase name="placeBetHandler when player is NOT valid should not call placeBet" duration="4"/>
+        <testCase name="placeBetHandler when payload NOT is valid should not call placeBet" duration="0"/>
+        <testCase name="placeBetHandler when payload NOT is valid should emit error to client" duration="1"/>
+        <testCase name="placeBetHandler when params is valid should call player.placeBet" duration="0"/>
     </file>
 </testExecutions>

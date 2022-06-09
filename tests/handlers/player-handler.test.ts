@@ -2,10 +2,7 @@ import { PlayerHandler } from "../../src/handlers/player-handler";
 import { Bet } from "../../src/models/bet";
 import { Chance } from "chance";
 import { User } from "../../src/models/game-data";
-import { CascadingSlotsConfig } from "../../src/models/config";
-import noticeHelper from "../../src/helpers/notice-helper";
-import { TrialConfigs } from "../../src/trial-configs";
-import { Round } from "../../src/models/round";
+import { CascadingSlotsConfig, Config } from "../../src/models/config";
 
 const chance = new Chance();
 
@@ -18,15 +15,16 @@ const cascadingSlotsConfig = {
     betLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     coinValues: [0.1, 0.5, 1, 2, 3, 4, 5],
 } as CascadingSlotsConfig;
+const config = {
+    cascadingSlotsConfig,
+} as Config;
 
-const logError = jest.fn();
-const roundCalculator = { processSpinning: jest.fn() };
-let handler = new PlayerHandler(cascadingSlotsConfig, user.emit);
+let handler = new PlayerHandler(config, user.emit);
 
 describe("playerHandler", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        handler = new PlayerHandler(cascadingSlotsConfig, user.emit);
+        handler = new PlayerHandler(config, user.emit);
     });
 
     describe("placeBet", () => {
