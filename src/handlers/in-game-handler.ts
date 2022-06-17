@@ -10,7 +10,7 @@ export const handleInGame = (socketClient: Socket, gameData: GameData, config: C
         coinValues: TrialConfigs.coinValues,
         betLevels,
         betMultiplier,
-        odds: { symbols: oddsByCounts, freespin: freeSpinsConfig },
+        odds: { symbols: oddsByCounts, freeSpins: freeSpinsConfig },
     };
 
     gameData[socketClient.id] = player;
