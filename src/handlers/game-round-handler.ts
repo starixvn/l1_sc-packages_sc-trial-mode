@@ -58,6 +58,9 @@ export class GameRoundHandler {
             })),
             multiplier: round.multiplier,
             totalMultiplier: round.totalMultiplier,
+            isFreeSpin: round.freeSpin,
+            reachMaxWin: round.reachMaxWin,
+            actualBetwin: round.actualBetwin,
         };
     }
 
@@ -85,6 +88,8 @@ export class GameRoundHandler {
             totalTumbleWin: 0,
             multiplier: 0,
             result: "",
+            actualBetwin: 0,
+            reachMaxWin: false,
         };
     }
 }

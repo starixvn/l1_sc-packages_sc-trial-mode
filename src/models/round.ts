@@ -32,4 +32,6 @@ export interface Round {
     totalTumbleWin: number;
     multiplier: number;
     result: string;
+    actualBetwin: number;
+    reachMaxWin: boolean;
 }
