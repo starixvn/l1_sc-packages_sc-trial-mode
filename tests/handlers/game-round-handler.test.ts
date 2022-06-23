@@ -1,6 +1,7 @@
 import { FreeSpinHandler, GameRoundHandler } from "../../src/handlers";
 import { CascadingSlotsConfig, RoundCalculator } from "../../src/models";
 import { Chance } from "chance";
+import { TrialConfigs } from "../../src/trial-configs";
 
 describe("gameRoundHandler", () => {
     jest.mock("../../src/handlers/free-spin-handler");
@@ -22,10 +23,11 @@ describe("gameRoundHandler", () => {
             freeSpin: chance.bool(),
         };
 
+        const mockRound = { ...bet, roundId: chance.natural(), totalAmount: chance.natural() };
         const roundCalculator: RoundCalculator = { processSpinning: jest.fn() };
 
         beforeEach(() => {
-            handler["generateRoundFromBet"] = jest.fn();
+            handler["generateRoundFromBet"] = jest.fn().mockReturnValueOnce(mockRound);
             handler["collectFreeSpins"] = jest.fn();
             handler["collectTotalMultiplier"] = jest.fn();
             handler["collectRoundResult"] = jest.fn();
@@ -41,16 +43,15 @@ describe("gameRoundHandler", () => {
 
         it("should call roundCalculator.processSpinning", async () => {
             // Arrange
-            const mockRound = { ...bet, roundId: chance.natural() };
             const totalMultiplier = chance.natural();
+            const maxWinPerRound = parseFloat((TrialConfigs.maxWinPerRound * mockRound.totalAmount).toFixed(2));
             freeSpinHandler.getCurrentTotalMultiplier = jest.fn().mockReturnValueOnce(totalMultiplier);
-            handler["generateRoundFromBet"] = jest.fn().mockReturnValueOnce(mockRound);
 
             // Act
             await handler.settle(bet, roundCalculator);
 
             // Assert
-            expect(roundCalculator.processSpinning).toBeCalledWith(mockRound, totalMultiplier);
+            expect(roundCalculator.processSpinning).toBeCalledWith(mockRound, totalMultiplier, maxWinPerRound);
         });
 
         it("should call collectFreeSpins", async () => {

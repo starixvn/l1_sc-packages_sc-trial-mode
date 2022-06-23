@@ -17,8 +17,9 @@ export class PlayerHandler {
         this.emit = emit;
         this.isProcessing = false;
         this.betQueue = [];
-        this.freeSpinHandler = new FreeSpinHandler();
         this.cascadingSlotsConfig = config.cascadingSlotsConfig;
+
+        this.freeSpinHandler = new FreeSpinHandler();
         this.gameRoundHandler = new GameRoundHandler(this.freeSpinHandler, config.cascadingSlotsConfig);
     }
 
@@ -46,21 +47,19 @@ export class PlayerHandler {
 
             this.isProcessing = true;
 
-            this.gameRoundHandler
-                .settle(bet, roundCalculator)
-                .then((settlementResult) => {
-                    this.balance = this.balance + settlementResult.win;
-                    this.emitMessage({
-                        finish: settlementResult,
-                        trialUser: { balance: this.balance },
-                    });
-                })
-                .catch((err) => {
-                    logError(err);
-                })
-                .finally(() => {
-                    this.isProcessing = false;
+            try {
+                const settleResult = await this.gameRoundHandler.settle(bet, roundCalculator);
+
+                this.balance = this.balance + settleResult.win;
+                this.emitMessage({
+                    finish: settleResult,
+                    trialUser: { balance: this.balance },
                 });
+            } catch (err) {
+                logError(err);
+            }
+
+            this.isProcessing = false;
         }
     }
 
@@ -102,7 +101,7 @@ export class PlayerHandler {
                 errorCode: NoticeHelper.invalidBet,
             },
             {
-                failure: bet.betLevel * bet.coinValue * this.cascadingSlotsConfig.betMultiplier > this.balance,
+                failure: !bet.freeSpin && bet.betLevel * bet.coinValue * this.cascadingSlotsConfig.betMultiplier > this.balance,
                 errorCode: NoticeHelper.notEnoughMoney,
             },
         ];

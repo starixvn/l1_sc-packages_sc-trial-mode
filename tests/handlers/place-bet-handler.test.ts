@@ -23,24 +23,6 @@ describe("placeBetHandler", () => {
         });
     });
 
-    describe("when payload NOT is valid", () => {
-        it("should not call placeBet", () => {
-            // Act
-            handlePlaceBet(socketClient as any, undefined, gameData);
-
-            // Assert
-            expect(player.placeBet).not.toBeCalled();
-        });
-
-        it("should emit error to client", () => {
-            // Act
-            handlePlaceBet(socketClient as any, undefined, gameData);
-
-            // Assert
-            expect(player.emitMessage).toBeCalledWith({ endBet: -1, errorCode: noticeHelper.invalidBet });
-        });
-    });
-
     describe("when params is valid", () => {
         it("should call player.placeBet", () => {
             // Arrange

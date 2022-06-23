@@ -1,4 +1,5 @@
 export const TrialConfigs = {
-    defaultBalance: 100000,
-    coinValues: [1, 2, 3, 5, 10],
+    defaultBalance: 10000,
+    coinValues: [0.1, 0.5, 1],
+    maxWinPerRound: 2000,
 };

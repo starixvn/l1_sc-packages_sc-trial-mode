@@ -10,6 +10,7 @@ export const handleInGame = (socketClient: Socket, gameData: GameData, config: C
         coinValues: TrialConfigs.coinValues,
         betLevels,
         betMultiplier,
+        maxWinPerRound: TrialConfigs.maxWinPerRound,
         odds: { symbols: oddsByCounts, freeSpins: freeSpinsConfig },
     };
 
