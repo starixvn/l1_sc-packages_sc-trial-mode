@@ -1,6 +1,6 @@
 {
   "name": "sc-trial-mode",
-  "version": "0.0.1-beta.11",
+  "version": "0.0.1-beta.12",
   "description": "Trial Mode Module",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
