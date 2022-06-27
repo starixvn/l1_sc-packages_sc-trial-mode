@@ -1,4 +1,4 @@
-import { CascadingSlotsConfig, GameData, RoundCalculator } from "../models";
+import { GameData, RoundCalculator } from "../models";
 
 export class ProcessQueueJob {
     private readonly gameData: GameData;

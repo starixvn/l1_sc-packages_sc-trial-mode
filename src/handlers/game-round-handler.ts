@@ -4,8 +4,8 @@ import { FreeSpinHandler } from "./";
 
 export class GameRoundHandler {
     private roundId: number;
-    private freeSpinHandler: FreeSpinHandler;
-    private cascadingSlotsConfig: CascadingSlotsConfig;
+    private readonly freeSpinHandler: FreeSpinHandler;
+    private readonly cascadingSlotsConfig: CascadingSlotsConfig;
 
     constructor(freeSpinHandler: FreeSpinHandler, cascadingSlotsConfig: CascadingSlotsConfig) {
         this.roundId = 0;

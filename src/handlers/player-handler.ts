@@ -6,11 +6,11 @@ import { FreeSpinHandler, GameRoundHandler } from "./";
 export class PlayerHandler {
     private readonly betQueue: Array<Bet>;
     private readonly emit: Function;
+    private readonly freeSpinHandler: FreeSpinHandler;
+    private readonly gameRoundHandler: GameRoundHandler;
+    private readonly cascadingSlotsConfig: CascadingSlotsConfig;
     private isProcessing: boolean;
     private balance: number;
-    private freeSpinHandler: FreeSpinHandler;
-    private gameRoundHandler: GameRoundHandler;
-    private cascadingSlotsConfig: CascadingSlotsConfig;
 
     constructor(config: Config, emit: Function) {
         this.balance = config.defaultBalance ?? TrialConfigs.defaultBalance;

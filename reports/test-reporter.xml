@@ -1,34 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\disconnet-handler.test.ts">
+        <testCase name="disconnectHandler handleDisconnect should delete player data on game data" duration="3"/>
+        <testCase name="disconnectHandler handleDisconnect should emit disconnect to client" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\sign-in-handler.test.ts">
+        <testCase name="signInHandler handleSignIn should emit signedIn" duration="4"/>
+        <testCase name="signInHandler handleSignIn should emit toGame" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\in-game-handler.test.ts">
+        <testCase name="inGameHandler should assign player info to ingame data" duration="5"/>
+        <testCase name="inGameHandler should emit config to client" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\game-round-handler.test.ts">
+        <testCase name="gameRoundHandler settle should call generateRoundFromBet" duration="6"/>
+        <testCase name="gameRoundHandler settle should call roundCalculator.processSpinning" duration="1"/>
+        <testCase name="gameRoundHandler settle should call collectFreeSpins" duration="1"/>
+        <testCase name="gameRoundHandler settle should call collectTotalMultiplier" duration="1"/>
+        <testCase name="gameRoundHandler settle should return round result" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\free-spin-handler.test.ts">
+        <testCase name="freeSpinHandler getFreeSpinData should return freeSpins" duration="6"/>
+        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins should decrease available freeSpins by one" duration="1"/>
+        <testCase name="freeSpinHandler useFreeSpin when having available freeSpins when having no freeSpins after using should call resetTotalMultiplier" duration="3"/>
+        <testCase name="freeSpinHandler gainFreeSpins when have available freeSpins should increase available freeSpins" duration="2"/>
+        <testCase name="freeSpinHandler gainFreeSpins when have no available freSpins should assign new freeSpin" duration="1"/>
+        <testCase name="freeSpinHandler getAvailableFreeSpins should return available freeSpins" duration="2"/>
+        <testCase name="freeSpinHandler increaseTotalMultiplier should increase total multiplier" duration="1"/>
+        <testCase name="freeSpinHandler getCurrentTotalMultiplier should return current total multiplier" duration="1"/>
+    </file>
+    <file path="D:\Lumi\sc-trial-mode\tests\handlers\place-bet-handler.test.ts">
+        <testCase name="placeBetHandler when player is NOT valid should not call placeBet" duration="2"/>
+        <testCase name="placeBetHandler when params is valid should call player.placeBet" duration="1"/>
+    </file>
     <file path="D:\Lumi\sc-trial-mode\tests\handlers\player-handler.test.ts">
-        <testCase name="playerHandler placeBet should call betQueue.push" duration="0"/>
-        <testCase name="playerHandler isHavingBet should return true when having bet" duration="0"/>
-        <testCase name="playerHandler dequeueBets should call getBetFromQueue" duration="0"/>
-        <testCase name="playerHandler dequeueBets when bet is valid when bet is using freeSpin should call freeSpinHandler.useFreeSpin" duration="0"/>
-        <testCase name="playerHandler dequeueBets when bet is valid when bet is normal bet should deduct balance" duration="0"/>
-        <testCase name="playerHandler dequeueBets when bet is valid should emit endBet to client" duration="0"/>
-        <testCase name="playerHandler dequeueBets when bet is valid should call gameRoundHandler.settle" duration="0"/>
-        <testCase name="playerHandler dequeueBets when bet is valid should emit settle result to client" duration="0"/>
-        <testCase name="playerHandler getBetFromQueue should call betQueue.shift" duration="0"/>
+        <testCase name="playerHandler placeBet should call betQueue.push" duration="5"/>
+        <testCase name="playerHandler isHavingBet should return true when having bet" duration="1"/>
+        <testCase name="playerHandler dequeueBets should call getBetFromQueue" duration="1"/>
+        <testCase name="playerHandler dequeueBets when bet is valid when bet is using freeSpin should call freeSpinHandler.useFreeSpin" duration="1"/>
+        <testCase name="playerHandler dequeueBets when bet is valid when bet is normal bet should deduct balance" duration="1"/>
+        <testCase name="playerHandler dequeueBets when bet is valid should emit endBet to client" duration="1"/>
+        <testCase name="playerHandler dequeueBets when bet is valid should call gameRoundHandler.settle" duration="1"/>
+        <testCase name="playerHandler dequeueBets when bet is valid should emit settle result to client" duration="1"/>
+        <testCase name="playerHandler getBetFromQueue should call betQueue.shift" duration="1"/>
         <testCase name="playerHandler getBetFromQueue should call freeSpinHandler.getAvailableFreeSpins" duration="0"/>
-        <testCase name="playerHandler getBetFromQueue when bet is freeSpins should call freeSpinHandler.getFreeSpinData" duration="2149124">
-            <failure message="Error: expect(jest.fn()).toBeCalled()"><![CDATA[Error: expect(jest.fn()).toBeCalled()
-
-Expected number of calls: >= 1
-Received number of calls:    0
-    at Object.<anonymous> (D:\Lumi\sc-trial-mode\tests\handlers\player-handler.test.ts:195:68)
-    at Promise.then.completed (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\utils.js:391:28)
-    at new Promise (<anonymous>)
-    at callAsyncCircusFn (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\utils.js:316:10)
-    at _callCircusTest (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:218:40)
-    at _runTest (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:155:3)
-    at _runTestsForDescribeBlock (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:66:9)
-    at _runTestsForDescribeBlock (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:60:9)
-    at _runTestsForDescribeBlock (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:60:9)
-    at _runTestsForDescribeBlock (D:\Lumi\sc-trial-mode\node_modules\jest-circus\build\run.js:60:9)]]></failure>
-        </testCase>
-        <testCase name="playerHandler getBetFromQueue when bet is freeSpins should return freeSpin bet info" duration="0"/>
+        <testCase name="playerHandler getBetFromQueue when bet is freeSpins should call freeSpinHandler.getFreeSpinData" duration="1"/>
+        <testCase name="playerHandler getBetFromQueue when bet is freeSpins should return freeSpin bet info" duration="1"/>
         <testCase name="playerHandler getBetFromQueue when bet is normal bet should call resetTotalMultiplier" duration="0"/>
-        <testCase name="playerHandler getBetFromQueue when bet is normal bet should return bet" duration="0"/>
+        <testCase name="playerHandler getBetFromQueue when bet is normal bet should return bet" duration="1"/>
+        <testCase name="playerHandler composeValidationCriteria when bet is processing should return error cannot place bet" duration="0"/>
+        <testCase name="playerHandler composeValidationCriteria when bet is freeSpin and having no freeSpin should return error invalid free spins" duration="0"/>
+        <testCase name="playerHandler composeValidationCriteria when bet level is not valid should return error invalid bet" duration="1"/>
+        <testCase name="playerHandler composeValidationCriteria when coin value is not valid should return error invalid bet" duration="0"/>
+        <testCase name="playerHandler composeValidationCriteria when having not enough balance and bet is not freeSpin should return error invalid bet" duration="1"/>
+        <testCase name="playerHandler composeValidationCriteria when having not enough balance and bet is freeSpin should return result with no failure" duration="0"/>
+        <testCase name="playerHandler validateBet should call freeSpinHandler.getAvailableFreeSpins" duration="1"/>
+        <testCase name="playerHandler validateBet when bet is free spin and having available free spin should return true" duration="1"/>
+        <testCase name="playerHandler validateBet when having failed criterion should emit bet failed" duration="1"/>
+        <testCase name="playerHandler validateBet when having failed criterion should return false" duration="0"/>
     </file>
 </testExecutions>
