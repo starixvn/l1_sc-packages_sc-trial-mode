@@ -1,5 +1,5 @@
 import { FreeSpinHandler, GameRoundHandler } from "../../src/handlers";
-import { CascadingSlotsConfig, RoundCalculator } from "../../src/models";
+import { CascadingSlotsConfig, Round, RoundCalculator } from "../../src/models";
 import { Chance } from "chance";
 import { TrialConfigs } from "../../src/trial-configs";
 
@@ -80,6 +80,103 @@ describe("gameRoundHandler", () => {
 
             // Assert
             expect(actualResult).toBe(roundResult);
+        });
+    });
+
+    describe("collectFreeSpins", () => {
+        beforeEach(() => {
+            freeSpinHandler.gainFreeSpins = jest.fn();
+        });
+
+        describe("when have no new freeSpin", () => {
+            it("should NOT call gainFreeSpins", () => {
+                // Arrange
+                const round = {
+                    betLevel: chance.natural(),
+                    coinValue: chance.natural(),
+                    settlementResult: {
+                        freeSpins: {
+                            odds: 0,
+                        },
+                        additionalFreeSpins: {
+                            odds: 0,
+                        },
+                    },
+                } as Round;
+
+                // Act
+                handler["collectFreeSpins"](round);
+
+                // Assert
+                expect(freeSpinHandler.gainFreeSpins).not.toBeCalled();
+            });
+        });
+
+        describe("when have new freeSpin", () => {
+            it("should call gainFreeSpins", () => {
+                // Arrange
+                const round = {
+                    betLevel: chance.natural(),
+                    coinValue: chance.natural(),
+                    settlementResult: {
+                        freeSpins: {
+                            odds: 0,
+                        },
+                        additionalFreeSpins: {
+                            odds: 1,
+                        },
+                    },
+                } as Round;
+                const expectedResult = {
+                    betLevel: round.betLevel,
+                    coinValue: round.coinValue,
+                    available: 1,
+                };
+
+                // Act
+                handler["collectFreeSpins"](round);
+
+                // Assert
+                expect(freeSpinHandler.gainFreeSpins).toBeCalledWith(expectedResult);
+            });
+        });
+    });
+
+    describe("collectTotalMultiplier", () => {
+        beforeEach(() => {
+            freeSpinHandler.increaseTotalMultiplier = jest.fn();
+        });
+
+        describe("when bet is NOT win", () => {
+            it("should NOT call freeSpinHandler.increaseTotalMultiplier", () => {
+                // Arrange
+                const round = {
+                    betwin: 0,
+                    multiplier: 2,
+                } as Round;
+
+                // Act
+                handler["collectTotalMultiplier"](round);
+
+                // Assert
+                expect(freeSpinHandler.increaseTotalMultiplier).not.toBeCalled();
+            });
+        });
+
+        describe("when bet is win", () => {
+            it("should call freeSpinHandler.increaseTotalMultiplier", () => {
+                // Arrange
+                const round = {
+                    betwin: 100,
+                    multiplier: 2,
+                } as Round;
+
+                // Act
+                handler["collectTotalMultiplier"](round);
+
+                // Assert
+                expect(freeSpinHandler.increaseTotalMultiplier).toBeCalledWith(round.multiplier);
+            });
         });
     });
 });

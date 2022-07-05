@@ -31,7 +31,7 @@ export class GameRoundHandler {
         const newFreeSpin = {
             betLevel: round.betLevel,
             coinValue: round.coinValue,
-            available: round.settlementResult.freeSpins.odds ?? round.settlementResult.additionalFreeSpins?.odds ?? 0,
+            available: round.settlementResult.freeSpins.odds || round.settlementResult.additionalFreeSpins?.odds || 0,
         };
 
         newFreeSpin.available && this.freeSpinHandler.gainFreeSpins(newFreeSpin);
