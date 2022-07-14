@@ -1,6 +1,5 @@
 import { CascadingSlotsConfig, Bet, RoundCalculator, Config } from "../models";
 import NoticeHelper from "../helpers/notice-helper";
-import { TrialConfigs } from "../trial-configs";
 import { FreeSpinHandler, GameRoundHandler } from "./";
 
 export class PlayerHandler {
@@ -13,7 +12,7 @@ export class PlayerHandler {
     private balance: number;
 
     constructor(config: Config, emit: Function) {
-        this.balance = config.defaultBalance ?? TrialConfigs.defaultBalance;
+        this.balance = config.defaultBalance;
         this.emit = emit;
         this.isProcessing = false;
         this.betQueue = [];
@@ -97,7 +96,7 @@ export class PlayerHandler {
                 errorCode: NoticeHelper.invalidFreeSpin,
             },
             {
-                failure: !this.cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !TrialConfigs.coinValues.includes(bet.coinValue),
+                failure: !this.cascadingSlotsConfig.betLevels.includes(bet.betLevel) || !this.cascadingSlotsConfig.coinValues.includes(bet.coinValue),
                 errorCode: NoticeHelper.invalidBet,
             },
             {

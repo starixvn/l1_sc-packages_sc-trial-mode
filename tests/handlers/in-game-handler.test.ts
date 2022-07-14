@@ -2,7 +2,6 @@ import { handleInGame } from "../../src/handlers/in-game-handler";
 import { Chance } from "chance";
 import { Config } from "../../src/models/config";
 import { PlayerHandler } from "../../src/handlers/player-handler";
-import { TrialConfigs } from "../../src/trial-configs";
 
 describe("inGameHandler", () => {
     const chance = new Chance();
@@ -29,16 +28,16 @@ describe("inGameHandler", () => {
         // Assert
         expect(socketClient.emit).toBeCalledWith(config.name, {
             gameConfigs: {
-                coinValues: TrialConfigs.coinValues,
+                coinValues: config.cascadingSlotsConfig.coinValues,
                 betLevels: config.cascadingSlotsConfig.betLevels,
                 betMultiplier: config.cascadingSlotsConfig.betMultiplier,
                 odds: { symbols: config.cascadingSlotsConfig.oddsByCounts, freeSpins: config.cascadingSlotsConfig.freeSpins },
-                maxWinPerRound: TrialConfigs.maxWinPerRound,
+                maxWinPerRound: config.cascadingSlotsConfig.maxWinPerRound,
             },
             totalMultiplier: 0,
             freeSpins: [],
             trialUser: {
-                balance: TrialConfigs.defaultBalance,
+                balance: config.defaultBalance,
                 rate: 1,
                 multiplier: 1,
             },

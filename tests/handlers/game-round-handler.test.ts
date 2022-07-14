@@ -7,7 +7,13 @@ describe("gameRoundHandler", () => {
     jest.mock("../../src/handlers/free-spin-handler");
 
     const chance = new Chance();
-    const cascadingSlotsConfig = { bigWinRatio: 2.5, betMultiplier: 20, oddsByCounts: {}, freeSpins: {} } as CascadingSlotsConfig;
+    const cascadingSlotsConfig = {
+        bigWinRatio: 2.5,
+        betMultiplier: 20,
+        maxWinPerRound: TrialConfigs.maxWinPerRound,
+        oddsByCounts: {},
+        freeSpins: {},
+    } as CascadingSlotsConfig;
     const freeSpinHandler = new FreeSpinHandler();
 
     let handler: GameRoundHandler;
@@ -44,7 +50,7 @@ describe("gameRoundHandler", () => {
         it("should call roundCalculator.processSpinning", async () => {
             // Arrange
             const totalMultiplier = chance.natural();
-            const maxWinPerRound = parseFloat((TrialConfigs.maxWinPerRound * mockRound.totalAmount).toFixed(2));
+            const maxWinPerRound = parseFloat((cascadingSlotsConfig.maxWinPerRound * mockRound.totalAmount).toFixed(2));
             freeSpinHandler.getCurrentTotalMultiplier = jest.fn().mockReturnValueOnce(totalMultiplier);
 
             // Act

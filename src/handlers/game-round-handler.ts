@@ -1,5 +1,4 @@
 import { Bet, Round, CascadingSlotsConfig, RoundCalculator } from "../models";
-import { TrialConfigs } from "../trial-configs";
 import { FreeSpinHandler } from "./";
 
 export class GameRoundHandler {
@@ -15,7 +14,7 @@ export class GameRoundHandler {
 
     public async settle(bet: Bet, roundCalculator: RoundCalculator) {
         const round = this.generateRoundFromBet(bet);
-        const maxWinPerRound = parseFloat((TrialConfigs.maxWinPerRound * round.totalAmount).toFixed(2));
+        const maxWinPerRound = parseFloat((this.cascadingSlotsConfig.maxWinPerRound * round.totalAmount).toFixed(2));
 
         await roundCalculator.processSpinning(round, this.freeSpinHandler.getCurrentTotalMultiplier(), maxWinPerRound);
 

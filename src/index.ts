@@ -5,6 +5,7 @@ import { GameData } from "./models/game-data";
 import { ProcessQueueJob } from "./crons/process-queue";
 import { handleSignIn } from "./handlers/sign-in-handler";
 import { RoundCalculator } from "./models/roundCalculator";
+import { TrialConfigs } from "./trial-configs";
 
 export class TrialMode {
     private config: Config;
@@ -19,11 +20,21 @@ export class TrialMode {
     }
 
     public init(configs: Config) {
-        this.config = configs;
+        this.config = this.buildTrialConfigs(configs);
 
         const processQueueJob = new ProcessQueueJob(this.gameData, this.roundCalculator, this.logError);
 
         processQueueJob.run();
+    }
+
+    private buildTrialConfigs(config: Config) {
+        const trialConfig = { ...config };
+
+        trialConfig.cascadingSlotsConfig.coinValues = config.cascadingSlotsConfig.coinValues ?? TrialConfigs.coinValues;
+        trialConfig.cascadingSlotsConfig.maxWinPerRound = config.cascadingSlotsConfig.maxWinPerRound ?? TrialConfigs.maxWinPerRound;
+        trialConfig.defaultBalance = config.defaultBalance ?? TrialConfigs.defaultBalance;
+
+        return trialConfig;
     }
 
     public registerSocketHandler(socketClient: Socket) {
