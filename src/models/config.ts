@@ -6,6 +6,7 @@ interface IconOddConfig {
 }
 
 interface CascadingSlotsConfig {
+    maxWinPerRound: number;
     betLevels: Array<number>;
     coinValues: Array<number>;
     betMultiplier: number;

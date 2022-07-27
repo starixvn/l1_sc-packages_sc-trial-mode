@@ -1,16 +1,15 @@
 import { Socket } from "socket.io";
 import { Config, GameData } from "../models";
 import { PlayerHandler } from "./";
-import { TrialConfigs } from "../trial-configs";
 
 export const handleInGame = (socketClient: Socket, gameData: GameData, config: Config) => {
-    const { betLevels, betMultiplier, oddsByCounts, freeSpins: freeSpinsConfig } = config.cascadingSlotsConfig;
+    const { betLevels, betMultiplier, oddsByCounts, freeSpins: freeSpinsConfig, coinValues, maxWinPerRound } = config.cascadingSlotsConfig;
     const player = new PlayerHandler(config, (payload) => socketClient.emit(config.name, payload));
     const gameConfigs = {
-        coinValues: TrialConfigs.coinValues,
+        coinValues,
         betLevels,
         betMultiplier,
-        maxWinPerRound: TrialConfigs.maxWinPerRound,
+        maxWinPerRound,
         odds: { symbols: oddsByCounts, freeSpins: freeSpinsConfig },
     };
 
@@ -21,7 +20,7 @@ export const handleInGame = (socketClient: Socket, gameData: GameData, config: C
         freeSpins: [],
         totalMultiplier: 0,
         trialUser: {
-            balance: config.defaultBalance ?? TrialConfigs.defaultBalance,
+            balance: config.defaultBalance,
             rate: 1,
             multiplier: 1,
         },
